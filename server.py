@@ -1,51 +1,90 @@
+import asyncio
 import os
-import sys
-import logging
+import time
+import aiohttp
+import jwt
 
-from flask import Flask, redirect, request
-from blinpy.utils import handlers, webutils
-from conf.auth import AUTH, BASE_URL
+from gidgethub.aiohttp import GitHubAPI
 
-def create_app():
-    """Use Flask to create app"""
 
-    app = Flask(__name__)
+def get_jwt(app_id):
 
-    @app.route("/", methods=['GET', 'POST'])
-    def main():
-        """Main function to handle all requests."""
+    path_to_private_key = os.getenv("PEM_FILE_PATH")
+    pem_file = open(path_to_private_key, "rt").read()
 
-        if request.method == "POST":
-            # GitHub sends the secret key in the payload header
-            if webutils.match_webhook_secret(request):
-                event = request.headers["X-GitHub-Event"]
-                event_to_action = {
-                    # "pull_request": handlers.handle_pull_request,
-                    # "integration_installation": handlers.handle_integration_installation,
-                    # "integration_installation_repositories": handlers.handle_integration_installation_repo,
-                    # "installation_repositories": handlers.handle_integration_installation_repo,
-                    # "ping": handlers.handle_ping,
-                    "issue_comment": handlers.handle_issue_comment,
-                    # "installation": handlers.handle_installation,
-                }
-                supported_event = event in event_to_action
-                # if supported_event:
-                return event_to_action[event](request)
-        #         else:
-        #             return handlers.handle_unsupported_requests(request)
-        #     else:
-        #         app.logger.info("Received an unauthorized request")
-        #         return handlers.handle_unauthorized_requests()
-        # else:
-        #     return
+    payload = {
+        "iat": int(time.time()),
+        "exp": int(time.time()) + (10 * 60),
+        "iss": app_id,
+    }
+    encoded = jwt.encode(payload, pem_file, algorithm="RS256")
+    bearer_token = encoded
 
-    app.secret_key = os.environ.setdefault("APP_SECRET_KEY", "")
-    app.config['SESSION_TYPE'] = 'filesystem'
+    return bearer_token
 
-    app.debug = False
-    return app
 
-app = create_app()
+async def get_installation(gh, jwt, username):
+    async for installation in gh.getiter(
+        "/app/installations",
+        jwt=jwt,
+        accept="application/vnd.github.machine-man-preview+json",
+    ):
+        if installation["account"]["login"] == username:
+            return installation
 
-if __name__ == '__main__':
-    app.run()
+    raise ValueError(f"Can't find installation by that user: {username}")
+
+
+async def get_installation_access_token(gh, jwt, installation_id):
+    # doc: https: // developer.github.com/v3/apps/#create-a-new-installation-token
+
+    access_token_url = (
+        f"https://api.github.com/app/installations/{installation_id}/access_tokens"
+    )
+    response = await gh.post(
+        access_token_url,
+        data=b"",
+        jwt=jwt,
+        accept="application/vnd.github.machine-man-preview+json",
+    )
+    # example response
+    # {
+    #   "token": "v1.1f699f1069f60xxx",
+    #   "expires_at": "2016-07-11T22:14:10Z"
+    # }
+
+    return response
+
+
+async def main():
+    async with aiohttp.ClientSession() as session:
+        app_id = os.getenv("GH_APP_ID")
+
+        jwt = get_jwt(app_id)
+        gh = GitHubAPI(session, "jiekeshi")
+
+        try:
+            installation = await get_installation(gh, jwt, "jiekeshi")
+
+        except ValueError as ve:
+            # Raised if Mariatta did not installed the GitHub App
+            print(ve)
+        else:
+            access_token = await get_installation_access_token(
+                gh, jwt=jwt, installation_id=installation["id"]
+            )
+
+            # treat access_token as if a personal access token
+
+            # Example, creating a GitHub issue as a GitHub App
+            gh_app = GitHubAPI(session, "black_out", oauth_token=access_token["token"])
+            await gh_app.post(
+                "/repos/jiekeshi/jiekeshi.github.io/issues",
+                data={
+                    "title": "This is a test",
+                    "body": "(I'm a buglocator GitHub App!)🤖",
+                },
+            )
+
+
+asyncio.run(main())
