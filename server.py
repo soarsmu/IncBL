@@ -77,12 +77,11 @@ async def main():
             # treat access_token as if a personal access token
 
             # Example, creating a GitHub issue as a GitHub App
-            gh_app = GitHubAPI(session, "black_out", oauth_token=access_token["token"])
+            gh_app = GitHubAPI(session, "jiekeshi", oauth_token=access_token["token"])
             await gh_app.post(
-                "/repos/jiekeshi/jiekeshi.github.io/issues",
+                "/repos/jiekeshi/jiekeshi.github.io/pulls/13/issue",
                 data={
-                    "title": "This is a test",
-                    "body": "(I'm a buglocator GitHub App!)🤖",
+                    "body": "Thank you for your commits. We have made incremental updates to our model and index!"
                 },
             )
 
