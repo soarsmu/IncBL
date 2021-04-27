@@ -3,8 +3,9 @@ Implement tokenizer and lemmatization for bug reports and code,
 
 and remove the stopwords, keywords and punctuation
 """
+
 import spacy
-from stopwords import ENG_STOPWORDS, KEYWORDS
+from src.stopwords import ENG_STOPWORDS, KEYWORDS
 
 text = spacy.load('en_core_web_sm')
 text.Defaults.stop_words.update(ENG_STOPWORDS, KEYWORDS)
@@ -18,5 +19,3 @@ def tokenizer(docs: dict) -> dict:
         tokens.setdefault(id_, [cont.lemma_ for cont in conts 
                         if not (cont.is_stop and cont.is_punct)])
     return tokens
-
-# print(tokenizer({1:"I lobe loves k, but ti ", 2:"I jgeigje iyy"}))
