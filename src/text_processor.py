@@ -1,19 +1,22 @@
 """
-Implement tokenizer and stemmer for bug reports and code,
+Implement tokenizer and lemmatization for bug reports and code,
 
-and remove the stopwords and keywords
+and remove the stopwords, keywords and punctuation
 """
-from spacy.lang.en import English
+import spacy
 from stopwords import ENG_STOPWORDS, KEYWORDS
 
-text = English()
+text = spacy.load('en_core_web_sm')
 text.Defaults.stop_words.update(ENG_STOPWORDS, KEYWORDS)
+lemmatizer = text.get_pipe("lemmatizer")
 
 def tokenizer(docs: dict) -> dict:
     """multiprocessing tokenizer"""
+
     tokens = {}
-    for doc in text.pipe(docs.values(), batch_size=300, n_process=8):
-        print(doc.keys())
+    for id_, conts in zip(docs.keys(), text.pipe(docs.values(), batch_size=300, n_process=8)):
+        tokens.setdefault(id_, [cont.lemma_ for cont in conts 
+                        if not (cont.is_stop and cont.is_punct)])
     return tokens
 
-print(tokenizer({1:"I lobe k ", 2:"I jgeigje iyy"}))
+# print(tokenizer({1:"I lobe loves k, but ti ", 2:"I jgeigje iyy"}))
