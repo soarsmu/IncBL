@@ -9,12 +9,11 @@ from stopwords import ENG_STOPWORDS, KEYWORDS
 text = English()
 text.Defaults.stop_words.update(ENG_STOPWORDS, KEYWORDS)
 
-def tokenizer(docs: list) -> dict:
+def tokenizer(docs: dict) -> dict:
     """multiprocessing tokenizer"""
-    dict = {}
-    for doc in text.pipe(docs, batch_size=300, n_process=8):
-        
-        
+    tokens = {}
+    for doc in text.pipe(docs.values(), batch_size=300, n_process=8):
+        print(doc.keys())
     return tokens
 
-print(tokenizer(["I lobe k ","I jgeigje iyy"]))
+print(tokenizer({1:"I lobe k ", 2:"I jgeigje iyy"}))
