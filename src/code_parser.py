@@ -26,3 +26,10 @@ parser_java.set_language(JAVA_LANGUAGE)
 
 parser_py = Parser()
 parser_py.set_language(PY_LANGUAGE)
+
+
+# parser_list = {
+#     'py':PY_LANGUAGE,
+#     'java':JAVA_LANGUAGE,
+#     # can be added more
+# }
