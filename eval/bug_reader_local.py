@@ -20,8 +20,10 @@ def bug_reader(bug_reports_path: str):
     
     tree = ET.parse(bug_reports_path)
     root = tree.getroot()
-    print(root[0][0].tag, root[0][0].)
-    
-    
+    for child in root[0].findall("buginformation"):
+        print(child.tag)
+        print(child.find("summary").text)
+        print(child.findall("description"))
+        
 
     return bug_data, fixed_files
