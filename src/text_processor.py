@@ -10,7 +10,7 @@ from src.stopwords import ENG_STOPWORDS, KEYWORDS
 text = spacy.load('en_core_web_sm')
 text.Defaults.stop_words.update(ENG_STOPWORDS, KEYWORDS)
 lemmatizer = text.get_pipe("lemmatizer")
-print(1)
+
 def tokenizer(docs: dict) -> dict:
     """multiprocessing tokenizer"""
 
