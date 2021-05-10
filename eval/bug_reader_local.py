@@ -2,10 +2,6 @@
 Read locally stored bug reports and preprocess their text
 """
 
-import os
-import re
-import time
-import numpy as np
 import xml.etree.ElementTree as ET
 from src.text_processor import tokenizer
 
