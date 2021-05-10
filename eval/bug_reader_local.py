@@ -16,14 +16,11 @@ def bug_reader(bug_reports_path: str):
 
     bug_data = {}
     fixed_files = {}
-    
-    
+
     tree = ET.parse(bug_reports_path)
     root = tree.getroot()
-    for child in root[0].findall("buginformation"):
-        print(child.tag)
-        print(child.find("summary").text)
-        print(child.findall("description"))
-        
-
+    for child in root:
+        bug_data[child.get("id")] = child[0].find("summary").text + child[0].find("description").text
+        fixed_files[child.get("id")] = child[1].find("file").text    
+    bug_data = tokenizer(bug_data)
     return bug_data, fixed_files
