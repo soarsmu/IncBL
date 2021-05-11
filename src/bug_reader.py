@@ -8,6 +8,10 @@ from src.text_processor import text_processor
 def bug_reader_local(bug_reports_path: str):
     """
     Parse bug reports in ".xml" file format, such as Bugzbook dataset.
+
+    Args: local bug reports store path
+
+    Returns: two dict, {ID: bug information}, {ID: fixed files}
     """
 
     bug_data = {}
@@ -23,6 +27,14 @@ def bug_reader_local(bug_reports_path: str):
 
 # TODO: access github to get issues' content
 
+
 def bug_reader(bug_reports_path: str):
+    """
+    Parse bug reports in json data format from github
+
+    Args: json data from github
+
+    Returns: one dict, {ID: bug information}
+    """
 
     pass

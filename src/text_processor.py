@@ -11,14 +11,26 @@ from src.stopwords import ENG_STOPWORDS, KEYWORDS
 text = spacy.load("en_core_web_sm")
  
 def extended_is_stop(token):
-    """add new stopwords"""
+    """
+    add new stopwords
+
+    Args: spacy token
+
+    Returns: boolean
+    """
 
     text.Defaults.stop_words.update(ENG_STOPWORDS, KEYWORDS)
     stop_words = text.Defaults.stop_words
     return token.is_stop or token.lower_ in stop_words or token.lemma_ in stop_words
 
 def text_processor(docs: dict) -> dict:
-    """tokenizer, lemmatizer and remove stopwords"""
+    """
+    tokenizer, lemmatizer and remove stopwords
+
+    Args: dict, {ID: bug information} or {ID: code contents}
+
+    Returns: dict as args
+    """
 
     tokens = {}
 
