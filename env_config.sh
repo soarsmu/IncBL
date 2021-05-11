@@ -1,6 +1,11 @@
 # Here we creatre a virtual environment and install necessary libraries
-conda create -n multibl python=3.7
-conda activate multibl
-pip install pandas comment_parser python-magic tqdm matplotlib
-pip install javalang xlrd eventlet timeout-decorator openpyxl prettytable sklearn pyclustering nltk
-pip install tree_sitter # for parser
+conda create -n incbl python=3.7
+conda activate incbl
+
+# Install Spacy
+pip install -U pip setuptools wheel
+pip install -U spacy
+python -m spacy download en_core_web_sm
+
+pip install --upgrade gensim
+pip install tree_sitter
