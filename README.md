@@ -3,7 +3,7 @@
 **IncBL** is a tool for locate bugs based on bug reports.
 
 ## Usage
-### Test
+### Test new features
 run `bash env_config.sh`
 
 
