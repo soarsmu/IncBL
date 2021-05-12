@@ -9,7 +9,11 @@ from src.similarity import compute_bugs_simi, compute_similarity, normalization
 class incbl():
 
     def __init__(self, bug_reports_path, code_base_path, index_path, model_path, fixed_bugs_path):
-
+        """
+        read bug reports and code
+        read index and model if have
+        read fixed_bugs
+        """
         if(): # local evaluation
             self.bug_data, self.fixed_files = bug_reader_local(bug_reports_path)
         else: 

@@ -9,14 +9,3 @@ def idf_computing():
     Returns: 
     """
     pass
-
-
-def idf_update():
-    """
-    update idf and tf-idf model
-
-    Args: 
-
-    Returns: 
-    """
-    pass
