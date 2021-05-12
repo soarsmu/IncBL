@@ -1,56 +1,52 @@
-import collections
-import fnmatch
-import hmac
-import json
-import os
+from gidgethub.aiohttp import GitHubAPI
 
-from flask import abort
-from flask import Response as FResponse
-import requests
-
-
-
-def query_request(query=None, method="GET", **kwargs):
+# TODO: get repo file content
+def get_repo_files():
     """
-    Queries like /repos/:id needs to be appended to the base URL,
-    Queries like https://raw.githubusercontent.com need not.
+    use Github API to get repo files and update
 
-    full list of kwargs see http://docs.python-requests.org/en/master/api/#requests.request
+    Args: url, api keys
     """
-
-    if query[0] == "/":
-        query = BASE_URL + query
-
-    request_kwargs = {
-        "auth": AUTH,
-    }
-    request_kwargs.update(**kwargs)
-    return requests.request(method, query, **request_kwargs)
+    pass
 
 
-def Response(data=None, status=200, mimetype='application/json'):
-    if data is None:
-        data = {}
+# TODO: web api to get
+def get_issue_content():
+    """
+    use Github API to get issues
 
-    response_object = json.dumps(data, default=lambda obj: obj.__dict__)
-    return FResponse(response_object, status=status, mimetype=mimetype)
+    Args: url, api keys
 
-def match_webhook_secret(request):
-    """Match the webhook secret sent from GitHub"""
-    if os.environ.get("OVER_HEROKU", False):
-        if ('X-Hub-Signature' in request.headers and
-           request.headers.get('X-Hub-Signature') is not None):
-            header_signature = request.headers.get('X-Hub-Signature', None)
-        else:
-            abort(403)
-        sha_name, signature = header_signature.split('=')
-        if sha_name != 'sha1':
-            abort(501)
+    Returns: json data
+    """
+    pass
 
-        mac = hmac.new(os.environ["GITHUB_PAYLOAD_SECRET"].encode(),
-                       msg=request.data,
-                       digestmod="sha1")
 
-        if not hmac.compare_digest(str(mac.hexdigest()), str(signature)):
-            abort(403)
-    return True
+# TODO: web api to send issue
+def send_issue_comment():
+    """
+    use Github API to send_issue_comment
+
+    Args: url, api keys, results
+    """
+    pass
+
+
+# TODO: web api to get pull_request
+def update_repo_files():
+    """
+    use Github API to get PR code and update local files
+
+    Args: url, api keys
+    """
+    pass
+
+
+# TODO: web api to send pull_request comments
+def send_pr_comment():
+    """
+    use Github API to get PR code and update local files
+
+    Args: url, api keys
+    """
+    pass
