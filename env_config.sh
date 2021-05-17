@@ -1,7 +1,5 @@
 # Here we creatre a virtual environment and install necessary libraries
 conda create -n incbl python=3.7
-source activate
-source deactivate
 conda activate incbl
 
 # Install Spacy
@@ -15,3 +13,5 @@ pip install -U spacy
 
 pip install --upgrade gensim
 pip install tree_sitter
+pip install pymongo
+pip install mongoengine
