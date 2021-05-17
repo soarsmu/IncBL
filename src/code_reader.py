@@ -24,6 +24,7 @@ BASH_LANGUAGE = Language('./build/my-languages.so', 'bash')
 PY_LANGUAGE = Language('./build/my-languages.so', 'python')
 JAVA_LANGUAGE = Language('./build/my-languages.so', 'java')
 C_LANGUAGE = Language('./build/my-languages.so', 'c')
+CPP_LANGUAGE = Language('./build/my-languages.so', 'c++')
 
 parser_java = Parser()
 parser_java.set_language(JAVA_LANGUAGE)

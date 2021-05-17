@@ -1,4 +1,43 @@
 from gidgethub.aiohttp import GitHubAPI
+import mongoengine
+
+MONGODB_HOST = "xxxxxxxxxx"
+MONGODB_PORT = 
+MONGODB_DB = "xxxxxx"
+MONGODB_USERNAME = "xxxxxx"
+MONGODB_PASSWORD = "xxxxxxx"
+
+conn = mongoengine.connect(
+        db = MONGODB_DB,
+        host = MONGODB_HOST,
+        port = MONGODB_PORT,
+        username = MONGODB_USERNAME,
+        password = MONGODB_PASSWORD)
+
+db = conn[MONGODB_DB]
+db.authenticate(MONGODB_USERNAME,MONGODB_PASSWORD)
+
+coll = db["xxxxxxxxxxxxx"]
+
+def code_insert():
+
+    pass
+
+
+def code_delete():
+
+    pass
+
+
+def code_update():
+
+    pass
+
+
+def bugs_insert():
+
+    pass
+
 
 # TODO: get repo file content
 def get_repo_files():
@@ -50,3 +89,4 @@ def send_pr_comment():
     Args: url, api keys
     """
     pass
+

@@ -20,7 +20,7 @@ class incbl():
             self.bug_data = bug_reader(bug_reports_path)
         
         if(): # first use
-            self.index = index_creation()
+            self.index = tf_computing()
             self.model = idf_computing()
         else:
             self.index = index_path
@@ -30,7 +30,7 @@ class incbl():
         self.code_data = code_reader(code_base_path)
         
             
-    def index_update(self):
+    def tf_update(self):
         """
         update index matrices
 
