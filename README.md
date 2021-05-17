@@ -16,12 +16,29 @@ run `bash env_config.sh`
 
 # TODOs:
 
-1. 流程重构，比如normlaization的位置
-2. 类重构
-3. 存储结构重构 不要使用文件。
-4. 设计的时候，要考虑future work
-
-# Limitation
+- [ ] Code file reader
+	- [x] Source Code reader
+	- [ ] Code parser
+- [x] Bug reports reader
+- [x] Text processor
+	- [x] Tokenizer
+	- [x] Stummer and Stopwords removal
+- [ ] TF computing
+	- [ ] TF matrix creation
+	- [ ] TF matrix update
+- [ ] IDF computing
+	- [ ] IDF matrix creation
+	- [ ] IDF matrix creation
+- [ ] Similarity Computing
+	- [ ] Bugs similarity
+	- [ ] Code files and bugs similarity
+	- [ ] Normalization
+- [ ] GitHub integration
+	- [ ] Clone and update repo
+	- [ ] Get and reply issues
+	- [ ] Reply PR comment
+  
+# Future Work
 
 1. 如果文件删除，或者重新命名，或者修改路径，则和bug report无法构建关系，如何处理，或者缓解这个问题。
 2. 是否意味着，需要存储更多的内容，是否可以进行增量存储；我们现在进行增量计算，只关心当前的矩阵，那么矩阵的历史是否需要保存。如果需要保存，肯定要进行增量存储。那么增量存储，用什么更合适？还是自己设计文件系统。
