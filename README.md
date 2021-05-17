@@ -8,13 +8,8 @@
 2. 数据结构和存储部分，我的初始设计是，为了同时传递信息的标注和信息，在文件读取后都以dict形式进行传递，比如{bugid: bug information}，存储文件也是将dict存储为.npy文件方便读取；这一点有待商榷，我现在的新想法是通过数据库的表进行存储，因为：a. 我们需要clone代码到本地进行计算，同时会保存index.npy，idf.npy，gensim生成的tfidfmodel，fixed_bugs.npy，这样以文件形式存储会在运行时读取/改代好多文件，但是用数据库的话其实只用和代码有关的一张表就可以全部存储；b. 数据库也许通过设定Github API中的不可更改的值作为主键，解决唯一标识文件的问题。而且会方便未来的增量存储。这一点还没有在设计里体现，会之后加进去。
 3. 关于使用的第三方库，改用Spacy来进行分词、去停用词和词还原，因为原来这个部分是手写的，用Spacy在大语料上会快不少；用Gensim来计算tf，idf，以及相应的model，因为a.它可以直接使用BugLocator claim有着最好效果的tf变种公式，并且可以快速单独输出tf矩阵；b.可以保存现有的tf-idf模型，我们对存下的模型手动的更新idf，方便计算。除此之外，如果未来的工作如果想要添加/改用新的embedding，Spacy和Gensim支持word2vec，doc2vec，bert等等很多representation的训练。
 
-## Usage
-### Test new features
-run `bash env_config.sh`
 
-
-
-# TODOs:
+## TODOs:
 
 - [ ] Code file reader
 	- [x] Source Code reader
@@ -28,21 +23,24 @@ run `bash env_config.sh`
 	- [ ] TF matrix update
 - [ ] IDF computing
 	- [ ] IDF matrix creation
-	- [ ] IDF matrix creation
+	- [ ] IDF matrix update
 - [ ] Similarity Computing
 	- [ ] Bugs similarity
 	- [ ] Code files and bugs similarity
 	- [ ] Normalization
-- [ ] Data Storage
-    - [ ] Code files storage
-	- [ ] matrix storage
-    - [ ] Bug report storage
+- [ ] Bug Localization
+    - [ ] Ranking
+    - [ ] Evaluation
+- [ ] Data Storage (MongoDB)
+    - [ ] Code files storage and update
+    - [ ] Bug report storage and update
+	- [ ] matrix storage and update
 - [ ] GitHub Integration
 	- [ ] Clone and update repo
 	- [ ] Get and reply issues
 	- [ ] Reply PR comment
   
-# Future Work
+## Future Work
 
 1. 如果文件删除，或者重新命名，或者修改路径，则和bug report无法构建关系，如何处理，或者缓解这个问题。
 2. 是否意味着，需要存储更多的内容，是否可以进行增量存储；我们现在进行增量计算，只关心当前的矩阵，那么矩阵的历史是否需要保存。如果需要保存，肯定要进行增量存储。那么增量存储，用什么更合适？还是自己设计文件系统。
