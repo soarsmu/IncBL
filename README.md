@@ -33,7 +33,11 @@ run `bash env_config.sh`
 	- [ ] Bugs similarity
 	- [ ] Code files and bugs similarity
 	- [ ] Normalization
-- [ ] GitHub integration
+- [ ] Data Storage
+    - [ ] Code files storage
+	- [ ] matrix storage
+    - [ ] Bug report storage
+- [ ] GitHub Integration
 	- [ ] Clone and update repo
 	- [ ] Get and reply issues
 	- [ ] Reply PR comment
