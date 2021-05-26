@@ -1,4 +1,9 @@
-# TODO: use Faiss or gensim to get cos similarity
+"""
+use Faiss or gensim to get cos similarity
+"""
+
+from gensim.similarities import SparseMatrixSimilarity
+
 def compute_bugs_simi():
     """
     use Faiss or gensim to get cos similarity between bugs
@@ -22,13 +27,20 @@ def normalization():
     pass
 
 
-def compute_similarity():
+def compute_similarity(bug_data, code_data, dct, model):
     """
-    use Faiss or gensim to get cos similarity between bugs and codes
+    use gensim to get cos similarity between bugs and codes
 
     Args: url, api keys
 
     Returns: number
     """
-    pass
+    similarity = {}
+
+    index = SparseMatrixSimilarity(model[code_data.values()], len(dct.token2id.keys()))
+
+    for bug_id, bug_cont in bug_data.items():
+        similarity[bug_id] = sorted(zip(code_data.keys(), index[model[dct.doc2bow(bug_cont)]]), key=lambda item: -item[1]) 
+
+    return similarity
 
