@@ -11,9 +11,9 @@
 
 ## TODOs:
 
-- [ ] Code file reader
+- [x] Code file reader
 	- [x] Source Code reader
-	- [ ] Code parser
+	- [x] Code parser
 - [x] Bug reports reader
 - [x] Text processor
 	- [x] Tokenizer
