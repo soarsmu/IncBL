@@ -1,6 +1,6 @@
 from src.incbl import incbl
 
-if __name__ = "__main__":
+if __name__ == "__main__":
 
     # TODO: argparse to add parameters
     incbl = incbl(bug_reports_path, code_base_path)
