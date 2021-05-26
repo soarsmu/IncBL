@@ -14,4 +14,3 @@ pip install -U spacy
 pip install --upgrade gensim
 pip install tree_sitter
 pip install pymongo
-pip install mongoengine
