@@ -4,6 +4,29 @@ Read local code files/github repos, commits and preprocess their text
 
 from tree_sitter import Language, Parser
 from src.text_processor import text_processor
+from multiprocessing import Pool, Process, Queue, Manager
+
+def code_reader(code_base_path: str) -> dict:
+    """
+    read code files and process code files
+
+    Args: string, local code store path
+
+    Returns: dict, {path: code content}
+    """
+
+    code_data = {}
+    
+    with open(code_base_path) as f:
+        try:
+            file_name = code_base_path
+            code_data[file_name] = f.read().strip().lower()
+        except UnicodeDecodeError:
+            return None
+
+        code_data = text_processor(code_data)
+
+        return code_data
 
 
 # Language.build_library(
@@ -49,31 +72,6 @@ def code_parser():
     """
     pass
 
-
-# TODO: not implement yet
-def code_reader(code_base_path: str) -> dict:
-    """
-    read code files and process code files
-
-    Args: string, local code store path
-
-    Returns: dict, {path: code content}
-    """
-
-    code_data = {}
-
-    with open(code_base_path) as f:
-        try:
-            file_name = code_base_path
-            code_data[file_name] = f.read().strip().lower()
-        except UnicodeDecodeError:
-            return None
-
-        code_data = text_processor(code_data)
-
-        return code_data
-
-
 def changed_code_reader():
     """
     for local evaluation, detect changed file and read it
@@ -83,4 +81,3 @@ def changed_code_reader():
     Returns: dict, {path: code content}
     """
     pass
-
