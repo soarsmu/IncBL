@@ -1,23 +1,11 @@
-from gidgethub.aiohttp import GitHubAPI
-import mongoengine
+"""
+Database connection/creation, collection connection/creation/update
 
-MONGODB_HOST = "xxxxxxxxxx"
-MONGODB_PORT = 
-MONGODB_DB = "xxxxxx"
-MONGODB_USERNAME = "xxxxxx"
-MONGODB_PASSWORD = "xxxxxxx"
+web api
+"""
+from pymongo import MongoClient
 
-conn = mongoengine.connect(
-        db = MONGODB_DB,
-        host = MONGODB_HOST,
-        port = MONGODB_PORT,
-        username = MONGODB_USERNAME,
-        password = MONGODB_PASSWORD)
-
-db = conn[MONGODB_DB]
-db.authenticate(MONGODB_USERNAME,MONGODB_PASSWORD)
-
-coll = db["xxxxxxxxxxxxx"]
+db_conn = MongoClient("localhost")
 
 def code_insert():
 
@@ -38,7 +26,25 @@ def bugs_insert():
 
     pass
 
+# # user_id: local_test
 
+# repos:{
+
+# ​	repoA: {
+
+# ​			repo_contents:{
+
+# ​									filepath: tf, {bugid: tf}, 
+
+# ​									filepath: tf, {bugid: tf}
+
+# ​									}
+
+# ​			df:{}
+
+# ​	}
+
+# }
 # TODO: get repo file content
 def get_repo_files():
     """
