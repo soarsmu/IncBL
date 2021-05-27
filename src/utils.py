@@ -26,25 +26,6 @@ def bugs_insert():
 
     pass
 
-# # user_id: local_test
-
-# repos:{
-
-# ​	repoA: {
-
-# ​			repo_contents:{
-
-# ​									filepath: tf, {bugid: tf}, 
-
-# ​									filepath: tf, {bugid: tf}
-
-# ​									}
-
-# ​			df:{}
-
-# ​	}
-
-# }
 # TODO: get repo file content
 def get_repo_files():
     """
