@@ -1,11 +1,12 @@
 """
 Read bug reports/issues and preprocess their text
 """
+import os
 import time
 import xml.etree.ElementTree as ET
 from src.text_processor import text_processor
 
-def bug_reader_local(bug_reports_path: str):
+def bug_reader_local(bug_reports_path: str, code_base_path:str):
     """
     Parse bug reports in ".xml" file format, such as Bugzbook dataset.
 
@@ -25,7 +26,7 @@ def bug_reader_local(bug_reports_path: str):
     root = tree.getroot()
     for child in root:
         bug_data[child.get("id")] = child[0].find("summary").text + child[0].find("description").text
-        fixed_files[child.get("id")] = [file_path.text for file_path in child[1].findall("file")]
+        fixed_files[child.get("id")] = [os.path.join(code_base_path, file_path.text) for file_path in child[1].findall("file")]
     bug_data = text_processor(bug_data)
 
     print("the time overhead is ", time.time()-start_time)
