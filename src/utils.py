@@ -1,5 +1,50 @@
-from gidgethub.aiohttp import GitHubAPI
+"""
+Database connection/creation, collection connection/creation/update
 
+web api
+"""
+from pymongo import MongoClient
+
+db_conn = MongoClient("localhost")
+
+def code_insert():
+
+    pass
+
+
+def code_delete():
+
+    pass
+
+
+def code_update():
+
+    pass
+
+
+def bugs_insert():
+
+    pass
+
+# # user_id: local_test
+
+# repos:{
+
+# ​	repoA: {
+
+# ​			repo_contents:{
+
+# ​									filepath: tf, {bugid: tf}, 
+
+# ​									filepath: tf, {bugid: tf}
+
+# ​									}
+
+# ​			df:{}
+
+# ​	}
+
+# }
 # TODO: get repo file content
 def get_repo_files():
     """
@@ -50,3 +95,4 @@ def send_pr_comment():
     Args: url, api keys
     """
     pass
+
