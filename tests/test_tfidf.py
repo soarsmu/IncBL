@@ -11,6 +11,8 @@ def test_tfidf_computing():
 
     code_data, dct, model = tfidf_computing(code_data)
 
+    print(code_data.values())
+
 if __name__=="__main__":
 
     test_tfidf_computing()
