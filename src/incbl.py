@@ -3,7 +3,7 @@ import time
 from src.bug_reader import bug_reader_local
 from src.code_reader import code_reader
 from src.tfidf import tfidf_computing
-from src.similarity import compute_similarity
+from src.similarity import compute_similarity, normalization
 
 class incbl():
 
@@ -31,9 +31,11 @@ class incbl():
 
         # TODO: history info and normalization
         bug_data, fixed_files = bug_reader_local(self.bug_report_path)
-        code_data, dct, model = tfidf_computing(code_reader(self.code_base_path, self.file_extension))
+        code_data, code_length = code_reader(self.code_base_path, self.file_extension)
+        code_data, dct, model = tfidf_computing(code_data)
 
-        self.results = compute_similarity(bug_data, code_data, dct, model)
+        self.results = normalization(compute_similarity(bug_data, code_data, dct, model), code_length)
+        
         print("the time overhead is ", time.time()-start_time, "\n The results is\n")
 
         for bug_id, code_paths in self.results.items():
