@@ -26,13 +26,18 @@ def code_reader(code_base_path: str, extension: list) -> dict:
             if(file_name.split(".")[-1].strip() in extension):
                 code_path = os.path.join(parent_dir, file_name)
                 with open(code_path) as f:
-                    code_data[code_path] = code_parser(f.read())
+                    if f.read(1):
+                        code_data[code_path] = code_parser(f.read())
 
     code_data = text_processor(code_data)
 
+    code_length = {}
+    for code_path, code_cont in code_data.items():
+        code_length[code_path] = len(code_cont)
+
     print("the time overhead is ", time.time()-start_time)
 
-    return code_data
+    return code_data, code_length
 
 def code_parser(code_cont: str):
     """
@@ -43,7 +48,7 @@ def code_parser(code_cont: str):
     Returns: string
     """
 
-    if not os.path.exists("./lib/my-languages.so"):
+    if not os.path.exists("./lib/languages.so"):
         Language.build_library(
             # Store the library in the `lib` directory
             "./lib/languages.so",
