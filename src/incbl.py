@@ -30,7 +30,7 @@ class incbl():
         print("\n localization starting...\n")
         start_time = time.time()
 
-        bug_data, fixed_files = bug_reader_local(self.bug_report_path, self.code_base_path)
+        bug_data, fixed_files = bug_reader_local(self.bug_report_path, self.code_base_path, self.file_extension)
         code_data, code_length = code_reader(self.code_base_path, self.file_extension)
         code_data, dct, model = tfidf_computing(code_data)
 
