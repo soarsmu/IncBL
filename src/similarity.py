@@ -1,31 +1,8 @@
 """
-use Faiss or gensim to get cos similarity
+use gensim to get cos similarity
 """
-
+import math
 from gensim.similarities import SparseMatrixSimilarity
-
-def compute_bugs_simi():
-    """
-    use Faiss or gensim to get cos similarity between bugs
-
-    Args: two dict, {path: bug information}, {ID: bug information}
-
-    Returns: number
-    """
-    pass
-
-
-# TODO: use length function
-def normalization():
-    """
-    use length function to normalization
-
-    Args: dict, {path: code content}
-
-    Returns: number
-    """
-    pass
-
 
 def compute_similarity(bug_data, code_data, dct, model):
     """
@@ -44,3 +21,32 @@ def compute_similarity(bug_data, code_data, dct, model):
 
     return similarity
 
+def normalization(similarity: dict, code_length: dict):
+    """
+    use length function to normalization
+
+    Args: dict, {path: code content}
+
+    Returns: number
+    """
+    min_length = min(code_length.values())
+    diff_length = max(code_length.values()) - min(code_length.values())
+    alpha = 0.2
+    norm_similarity = {}
+    for bug_id, code_paths in similarity.items():
+        for code_path in code_paths:
+            code_path =(code_path[0], alpha * 1.0 / (1 + math.exp(code_length[code_path[0]] - min_length) / diff_length))
+
+    return similarity
+
+
+def compute_bugs_simi():
+    """
+    use gensim to get cos similarity between bugs
+
+    Args: two dict, {path: bug information}, {ID: bug information}
+
+    Returns: number
+    """
+    
+    pass
