@@ -5,7 +5,6 @@ import os
 from tree_sitter import Language, Parser
 from src.text_processor import text_processor
 import time
-from multiprocessing import Pool, Process, Queue, Manager
 
 def code_reader(code_base_path: str, extension: list) -> dict:
     """
@@ -16,6 +15,7 @@ def code_reader(code_base_path: str, extension: list) -> dict:
     Returns: dict, {path: code content}
     """
     code_data = {}
+    code_length = {}
 
     print("\n let's read the code files...\n")
     start_time = time.time()
@@ -31,7 +31,6 @@ def code_reader(code_base_path: str, extension: list) -> dict:
 
     code_data = text_processor(code_data)
 
-    code_length = {}
     for code_path, code_cont in code_data.items():
         code_length[code_path] = len(code_cont)
 
