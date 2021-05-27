@@ -6,7 +6,7 @@ import time
 import xml.etree.ElementTree as ET
 from src.text_processor import text_processor
 
-def bug_reader_local(bug_reports_path: str, code_base_path:str):
+def bug_reader_local(bug_reports_path: str, code_base_path:str, extension: list):
     """
     Parse bug reports in ".xml" file format, such as Bugzbook dataset.
 
@@ -25,8 +25,11 @@ def bug_reader_local(bug_reports_path: str, code_base_path:str):
     tree = ET.parse(bug_reports_path)
     root = tree.getroot()
     for child in root:
-        bug_data[child.get("id")] = child[0].find("summary").text + child[0].find("description").text
-        fixed_files[child.get("id")] = [os.path.join(code_base_path, file_path.text) for file_path in child[1].findall("file")]
+        bug_data[child.get("id")] = str(child[0].find("summary").text) + str(child[0].find("description").text)
+        fixed_files[child.get("id")] = []
+        for file_path in child[1].findall("file"):
+            if file_path.text.split(".")[-1].strip() in extension:
+                fixed_files[child.get("id")].append(os.path.join(code_base_path, file_path.text))
     bug_data = text_processor(bug_data)
 
     print("the time overhead is ", time.time()-start_time)
