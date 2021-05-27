@@ -14,6 +14,5 @@ if __name__ == "__main__":
     file_extension = args.file_extension
     incbl = incbl(bug_report_path, code_base_path, file_extension)
     incbl.localization()
-    incbl.evaluation()
 
 
