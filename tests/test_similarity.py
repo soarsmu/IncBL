@@ -2,6 +2,7 @@ import sys
 sys.path.append(".")
 from src.tfidf import tfidf_computing
 from src.similarity import compute_similarity
+from src.similarity import normalization
 from src.text_processor import text_processor
 
 def test_compute_similarity():
