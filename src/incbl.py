@@ -43,6 +43,7 @@ class incbl():
         for bug_id, code_files in self.results.items():
             print(bug_id + ":" + "\n")
             index = 0
+            print(fixed_files[bug_id])
             for code_path, simi_score in code_files.items():
                 if not index >= 10:
                     print("\t" + code_path + "\t" + str(simi_score))
@@ -50,7 +51,7 @@ class incbl():
                 else: break
         
         evaluation(bug_data, fixed_files, self.code_base_path, self.results)
-        
+
     def tf_update(self):
         """
         update index matrices
