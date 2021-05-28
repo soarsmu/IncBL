@@ -25,7 +25,7 @@ def evaluation(bug_data:dict, fixed_files:dict, code_base_path:str, results:dict
                     map_tmp += temp/(i+1.0)
 
         if not temp == 0:
-            map_value += map_tmp / temp 
+            map_value += map_tmp / len(file_paths)
 
     acc /= truth_num
     map_value /= len(fixed_files)

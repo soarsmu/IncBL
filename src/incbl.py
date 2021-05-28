@@ -50,6 +50,7 @@ class incbl():
                 else: break
         
         evaluation(bug_data, fixed_files, self.code_base_path, self.results)
+        
     def tf_update(self):
         """
         update index matrices
