@@ -1,29 +1,46 @@
 """
 compute tf, df and idf matrices
 """
-from gensim.models import TfidfModel
+import numpy as np
 from gensim.corpora import Dictionary
 
 # TODO: use gensim to compute idf and store tf matrices, see https://radimrehurek.com/gensim/corpora/mmcorpus.html
 
-def tfidf_computing(code_data: dict):
-    """
-    index the code files by their tf matrices,
-    save .npy file
+def get_docu_feature(text_data):
 
-    Args: dict, {path: code content}
-
-    Returns: dict, {path: index}
-    """
+    dct = Dictionary(text_data.values())
+    word_list = np.empty(len(dct), dtype = "a25")
+    for i in range(len(dct)):
+        word_list[i] = dct.__getitem__(i)
     
-    dct = Dictionary(code_data.values())
+    dfs = np.zeros(word_list.size)
+    for words in text_data.values():
+        for word in words:
+            dfs[word_list == (word).encode()] += 1
 
-    for code_path, code_cont in code_data.items():
-        code_data[code_path] = dct.doc2bow(code_cont)
+    idfs = np.log(len(text_data)/dfs)
 
-    model = TfidfModel(corpus=code_data.values(), smartirs="lfn")
+    return word_list, dfs, idfs
 
-    # TODO: save tf, idf
+def get_term_feature(word_list, text_data):
     
-    return code_data, dct, model
+    file_id = np.empty(len(text_data), dtype = "a200")
+    tfs = np.zeros([len(text_data), word_list.size])
+    for i, (code_path, code_conts) in enumerate(text_data.items()):
+        file_id[i] = code_path
+        for code_cont in code_conts:
+            tfs[i][word_list == (code_cont).encode()] += 1
+
+    lv_tfs = np.log(tfs) + 1
+    lv_tfs[np.isnan(lv_tfs)] = 0
+    lv_tfs[np.isinf(lv_tfs)] = 0
+
+    return file_id, lv_tfs
+
+def tfidf_creation(file_id, tfs, idfs):
+    
+    idfs = np.tile(idfs, (file_id.size, 1))
+    tf_idfs = np.multiply(tfs, idfs)
+
+    return tf_idfs
 

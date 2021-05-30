@@ -1,57 +1,35 @@
-"""
-use gensim to get cos similarity
-"""
 import os
 import math
+import numpy as np
 from itertools import product
 from more_itertools import map_reduce, flatten
 from gensim.models import TfidfModel
 from gensim.corpora import Dictionary
 from gensim.similarities import SparseMatrixSimilarity
 
-def compute_similarity(bug_data, code_data, dct, model):
-    """
-    use gensim to get cos similarity between bugs and codes
-
-    Args: url, api keys
-
-    Returns: dict
-    """
-    similarity = {}
-
-    index = SparseMatrixSimilarity(model[code_data.values()], len(dct.token2id.keys()))
-
-    for bug_id, bug_cont in bug_data.items():
-        similarity[bug_id] = dict(zip(code_data.keys(), index[model[dct.doc2bow(bug_cont)]]))
+def compute_similarity(bug_vector, code_vector, bug_ids, file_ids):
     
+    similarity = np.zeros([bug_ids.size, file_ids.size])
+
+    for bug_id in bug_ids:
+        for file_id in file_ids:
+            similarity[bug_ids == bug_id, file_ids == file_id] = 0.5 + 0.5 * np.sum(bug_vector[bug_ids == bug_id] * code_vector[file_ids == file_id])/(np.linalg.norm(bug_vector[bug_ids == bug_id]) *np.linalg.norm(code_vector[file_ids == file_id]))
+
     return similarity
 
-def normalization(similarity: dict, code_length: dict):
-    """
-    use length function to normalization
-
-    Args: dict, {path: code content}
-
-    Returns: number
-    """
+def normalization(similarity, code_length, bug_ids, file_ids):
+    
     min_length = min(code_length.values())
     diff_length = max(code_length.values()) - min_length
 
-    for bug_id, code_files in similarity.items():
-        for code_path in code_files.keys():
-            code_files[code_path] *= 1.0 / (1 + math.exp(-(code_length[code_path] - min_length) / diff_length))
+    for bug_id in bug_ids:
+        for file_id in file_ids:
+            similarity[bug_ids == bug_id, file_ids == file_id] *= 1.0 / (1 + math.exp(-(code_length[(file_id).decode()] - min_length) / diff_length))
         
     return similarity
 
-
-def combine_bugs_simi(similarity:dict, fixed_files:dict, bug_data:dict, code_base_path:str):
-    """
-    use gensim to get cos similarity between bugs
-
-    Args: two dict, {path: bug information}, {ID: bug information}
-
-    Returns: number
-    """
+def combine_bugs_simi(similarity, fixed_files, bug_data, bug_ids, file_ids):
+    
     alpha = 0.2
     dct = Dictionary(bug_data.values())
 
@@ -68,19 +46,21 @@ def combine_bugs_simi(similarity:dict, fixed_files:dict, bug_data:dict, code_bas
     value_key_pairs = flatten(product(v,(k,)) for k,v in fixed_files.items())
     fixed_files = dict(map_reduce(value_key_pairs, lambda k:k[0], lambda k:k[1]))
     
-    for bug_id, code_files in similarity.items():
-        for code_path, simi_score in code_files.items():
-            if code_path in fixed_files.keys():
+    for bug_id in bug_ids:
+        for file_id in file_ids:
+            if file_id.decode() in fixed_files.keys():
+                print(1)
                 temp = 0
-                for past_bug in fixed_files[code_path]:
+                for past_bug in fixed_files[file_id]:
                     temp += bug_simi[bug_id][past_bug]
-                if bug_id in fixed_files[code_path] and len(fixed_files[code_path])>1:
-                    temp = (temp - 1)/(len(fixed_files[code_path]) - 1)
+                if bug_id in fixed_files[file_id] and len(fixed_files[file_id])>1:
+                    temp = (temp - 1)/(len(fixed_files[file_id]) - 1)
                 else:
-                    temp /= len(fixed_files[code_path])
-                
-                code_files[code_path] = alpha*temp + (1-alpha)*simi_score
+                    temp /= len(fixed_files[file_id])
 
-        similarity[bug_id] = dict(sorted(code_files.items(), key=lambda item: -item[1]))
+                similarity[bug_ids == bug_id, file_ids == file_id] =  (alpha*temp + (1-alpha)*similarity[bug_ids == bug_id, file_ids == file_id])
+                # code_files[code_path] = alpha*temp + (1-alpha)*simi_score
+
+        # similarity[bug_id] = dict(sorted(code_files.items(), key=lambda item: -item[1]))
         
     return similarity
