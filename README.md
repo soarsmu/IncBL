@@ -16,8 +16,8 @@ The following implementation is as follows:
 
    For each user, a folder are created to store the word list, tf, df matrices. These data is stored as ".npy" file to fast read and update.
    The other information, namely code data and bug data, we store them in a database by MongoDB.
-   For code data: `{"_id"(inherent):…, "SHA":…, "file_path":…, "file_content":…}`
-   For bug data: `{"_id"(inherent):…, "bug_id", "bug_content":…, "fixed_files":…}`
+   For code data: each collection is `{"_id"(inherent):…, "repo_name":…, {"SHA":…, "file_path":…, "file_content":…}}`
+   For bug data db: each collection is `{"_id"(inherent):…, "bug_id", "bug_content":…, "fixed_files":…}`
    When we get a new issue, do a git fetch to get all commits, then check the SHA and file_path to decide whether update the code file.
    Maybe this can be implemented by github API, I'm looking into it.
 
