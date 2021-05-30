@@ -6,46 +6,27 @@ import time
 import xml.etree.ElementTree as ET
 from src.text_processor import text_processor
 
-def bug_reader_local(bug_reports_path: str, code_base_path:str, extension: list):
-    """
-    Parse bug reports in ".xml" file format, such as Bugzbook dataset.
-
-    Args: local bug reports store path
-
-    Returns: two dict, {ID: bug information}, {ID: fixed files}
-    """
-
+def bug_reader(bug_report_path, code_base_path, file_type):
+  
     bug_data = {}
     fixed_files = {}
 
     print("\n let's read the bug reports...\n")
-    
     start_time = time.time()
 
-    tree = ET.parse(bug_reports_path)
+    tree = ET.parse(bug_report_path)
     root = tree.getroot()
     for child in root:
-        bug_data[child.get("id")] = str(child[0].find("summary").text) + str(child[0].find("description").text)
+        try:
+            bug_data[child.get("id")] = child[0].text + child[1].text
+        except: 
+            bug_data[child.get("id")] = child[0].text
+            
         fixed_files[child.get("id")] = []
-        for file_path in child[1].findall("file"):
-            if file_path.text.split(".")[-1].strip() in extension:
+        for file_path in child[2].findall("file"):
+            if file_path.text.split(".")[-1].strip() in file_type:
                 fixed_files[child.get("id")].append(os.path.join(code_base_path, file_path.text))
     bug_data = text_processor(bug_data)
 
-    print("the time overhead is ", time.time()-start_time)
-
+    print("the overhead is ", time.time() - start_time)
     return bug_data, fixed_files
-
-# TODO: access github to get issues' content
-
-
-def bug_reader(bug_reports_path: str):
-    """
-    Parse bug reports in json data format from github
-
-    Args: json data from github
-
-    Returns: one dict, {ID: bug information}
-    """
-
-    pass
