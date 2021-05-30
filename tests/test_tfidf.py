@@ -1,6 +1,6 @@
 import sys
 sys.path.append(".")
-from src.tfidf import tfidf_creation
+from src.tfidf import tfidf_creation, get_docu_feature, get_term_feature
 from src.text_processor import text_processor
 
 def test_tfidf_creation():
@@ -8,10 +8,12 @@ def test_tfidf_creation():
     code_data = text_processor(code_data)
 
     expected_result = {}
+    dfs, idfs = get_docu_feature(code_data)
+    tfs = get_term_feature(code_data, dfs)
+    
+    tf_idfs = tfidf_creation(tfs, idfs)
 
-    file_id, tf_idfs = tfidf_creation(code_data)
-
-    print(tf_idfs)
+    # print(tf_idfs)
     
 
 if __name__=="__main__":
