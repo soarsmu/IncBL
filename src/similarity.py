@@ -7,28 +7,19 @@ from gensim.models import TfidfModel
 from gensim.corpora import Dictionary
 from gensim.similarities import SparseMatrixSimilarity
 
-def compute_similarity(bug_vector, code_vector, bug_ids, file_ids):
+def compute_similarity(bug_vector, code_vector):
+    alpha = 0.2
+    similarity = np.zeros((bug_vector.shape[0], code_vector.shape[0]), dtype=[("bug", "a30"),("file", "a250"), ("score", "f4")])
     
-    similarity = np.zeros([bug_ids.size, file_ids.size])
-
-    for bug_id in bug_ids:
-        for file_id in file_ids:
-            similarity[bug_ids == bug_id, file_ids == file_id] = 0.5 + 0.5 * np.sum(bug_vector[bug_ids == bug_id] * code_vector[file_ids == file_id])/(np.linalg.norm(bug_vector[bug_ids == bug_id]) *np.linalg.norm(code_vector[file_ids == file_id]))
+    for i in range(bug_vector.shape[0]):
+        similarity[i]["bug"] = bug_vector[i]["id"][0]
+        for j in range(code_vector.shape[0]):
+            similarity[i][j]["file"] = code_vector[j]["id"][0]
+            similarity[i][j]["score"] = (0.5 + 0.5 * np.sum(bug_vector[i]["tf_idf"] * code_vector[j]["tf_idf"])/(np.linalg.norm(bug_vector[i]["tf_idf"]) * np.linalg.norm(code_vector[j]["tf_idf"]))) * code_vector[i][j]["norm"]
 
     return similarity
 
-def normalization(similarity, code_length, bug_ids, file_ids):
-    
-    min_length = min(code_length.values())
-    diff_length = max(code_length.values()) - min_length
-
-    for bug_id in bug_ids:
-        for file_id in file_ids:
-            similarity[bug_ids == bug_id, file_ids == file_id] *= 1.0 / (1 + math.exp(-(code_length[(file_id).decode()] - min_length) / diff_length))
-        
-    return similarity
-
-def combine_bugs_simi(similarity, fixed_files, bug_data, bug_ids, file_ids):
+def bugs_similarity(bug_vector, fixed_files, bug_data):
     
     alpha = 0.2
     dct = Dictionary(bug_data.values())
@@ -37,7 +28,7 @@ def combine_bugs_simi(similarity, fixed_files, bug_data, bug_ids, file_ids):
         bug_data[bug_id] = dct.doc2bow(bug_cont)
 
     model = TfidfModel(corpus=bug_data.values(), smartirs="lfn")
-    index = SparseMatrixSimilarity(model[bug_data.values()], len(dct.token2id.keys()))
+    index = SparseMatrixSimilarity(model[bug_rdata.values()], len(dct.token2id.keys()))
 
     bug_simi = {}
     for bug_id, bug_cont in bug_data.items():
@@ -59,8 +50,5 @@ def combine_bugs_simi(similarity, fixed_files, bug_data, bug_ids, file_ids):
                     temp /= len(fixed_files[file_id])
 
                 similarity[bug_ids == bug_id, file_ids == file_id] =  (alpha*temp + (1-alpha)*similarity[bug_ids == bug_id, file_ids == file_id])
-                # code_files[code_path] = alpha*temp + (1-alpha)*simi_score
-
-        # similarity[bug_id] = dict(sorted(code_files.items(), key=lambda item: -item[1]))
-        
+                
     return similarity
