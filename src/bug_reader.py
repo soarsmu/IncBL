@@ -2,7 +2,6 @@
 Read bug reports/issues and preprocess their text
 """
 import os
-import time
 import xml.etree.ElementTree as ET
 from src.text_processor import text_processor
 
@@ -10,9 +9,6 @@ def bug_reader(bug_report_path, code_base_path, file_type):
   
     bug_data = {}
     fixed_files = {}
-
-    print("\n let's read the bug reports...")
-    start_time = time.time()
 
     tree = ET.parse(bug_report_path)
     root = tree.getroot()
@@ -28,5 +24,4 @@ def bug_reader(bug_report_path, code_base_path, file_type):
                 fixed_files[child.get("id")].append(os.path.join(code_base_path, file_path.text))
     bug_data = text_processor(bug_data)
 
-    print("the overhead is ", time.time() - start_time)
     return bug_data, fixed_files
