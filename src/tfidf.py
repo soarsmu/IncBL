@@ -16,9 +16,9 @@ def get_docu_feature(text_data):
         dfs[i]["term"] = dct.__getitem__(i)
         dfs[i]["df"] = dct.dfs[i]
         
-    idfs = np.zeros(len(dct), dtype=[("term", "a30"), ("df", "f4")])
+    idfs = np.zeros(len(dct), dtype=[("term", "a30"), ("idf", "f4")])
     idfs["term"] = dfs["term"]
-    idfs["df"] = np.log(len(text_data)/dfs["df"])
+    idfs["idf"] = np.log(len(text_data)/dfs["df"])
 
     return dfs, idfs
 
@@ -48,8 +48,6 @@ def tfidf_creation(tfs, idfs):
     
     tf_idfs = np.zeros(tfs.shape, dtype=[("file", "a250"),("term", "a30"), ("tf_idf", "f4")])
     idfs = np.tile(idfs, (tfs.shape[0], 1))
-    print(idfs)
-    tf_idfs = np.multiply(tfs, idfs)
-
+    tf_idfs["tf_idf"] = np.multiply(tfs["tf"], idfs["idf"])
     return tf_idfs
 
