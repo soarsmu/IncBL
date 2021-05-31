@@ -2,29 +2,6 @@
 
 **IncBL** is a tool for locate bugs based on bug reports.
 
-## New design
-
-Yesterday I finished code about manual computation functions by numpy to instead gensim lib. 
-
-Now the data structure in our design is numpy.array, and we use words and paths for boolean indexing, namely, for querying a word's document frequency, we can df["word"], so is the tf.
-
-The following implementation is as follows:
-
-1. Multiprocessing support.
-
-2. Data storage:
-
-   For each user, a folder are created to store the word list, tf, df matrices. These data is stored as ".npy" file to fast read and update.
-   The other information, namely code data and bug data, we store them in a database by MongoDB.
-   For code data: each collection is `{"_id"(inherent):…, "repo_name":…, {"SHA":…, "file_path":…, "file_content":…}}`
-   For bug data db: each collection is `{"_id"(inherent):…, "bug_id", "bug_content":…, "fixed_files":…}`
-   When we get a new issue, do a git fetch to get all commits, then check the SHA and file_path to decide whether update the code file.
-   Maybe this can be implemented by github API, I'm looking into it.
-
-3. Update function
-
-
-
 ## TODOs:
 
 - [x] Code file reader
@@ -35,18 +12,18 @@ The following implementation is as follows:
 	- [x] Tokenizer
 	- [x] Stummer and Stopwords removal
 - [ ] TF computing
-	- [ ] TF matrix creation
+	- [x] TF matrix creation
 	- [ ] TF matrix update
 - [ ] IDF computing
-	- [ ] IDF matrix creation
+	- [x] IDF matrix creation
 	- [ ] IDF matrix update
 - [ ] Similarity Computing
 	- [ ] Bugs similarity
-	- [ ] Code files and bugs similarity
-	- [ ] Normalization
-- [ ] Bug Localization
-    - [ ] Ranking
-    - [ ] Evaluation
+	- [x] Code files and bugs similarity
+	- [x] Normalization
+- [x] Bug Localization
+    - [x] Ranking
+    - [x] Evaluation
 - [ ] Data Storage (MongoDB)
     - [ ] Code files storage and update
     - [ ] Bug report storage and update
