@@ -1,5 +1,4 @@
 import os
-import time
 from tree_sitter import Language, Parser
 from multiprocessing import Queue, Pool, Manager
 from src.text_processor import text_processor
@@ -18,8 +17,6 @@ def mp_code_reader(code_base_path, file_type):
 
     code_data = {}
     
-    print("\n let's read the code files...\n")
-    start_time = time.time()
     code_files = filter_files(code_base_path, file_type)
 
     q = Manager().Queue()
@@ -31,8 +28,6 @@ def mp_code_reader(code_base_path, file_type):
 
     for code_file in code_files:
         code_data.update(q.get())
-
-    print("the overhead is ", time.time()-start_time)
 
     return code_data
 
