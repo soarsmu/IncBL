@@ -1,10 +1,5 @@
-"""
-Read local code files/github repos, commits and preprocess their text
-"""
 import os
 import time
-
-from numpy.core.numeric import identity
 from tree_sitter import Language, Parser
 from multiprocessing import Queue, Pool, Manager
 from src.text_processor import text_processor
