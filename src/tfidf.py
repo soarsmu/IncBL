@@ -1,10 +1,6 @@
-"""
-compute tf, df and idf matrices
-"""
 import numpy as np
 from gensim.corpora import Dictionary
-
-# TODO: use gensim to compute idf and store tf matrices, see https://radimrehurek.com/gensim/corpora/mmcorpus.html
+from multiprocessing import Queue, Pool, Manager
 
 def get_docu_feature(text_data):
 
@@ -20,34 +16,44 @@ def get_docu_feature(text_data):
     idfs["term"] = dfs["term"]
     idfs["idf"] = np.log(len(text_data)/dfs["df"])
 
-    return dfs, idfs
+    return idfs
 
-def get_term_feature(text_data, dfs):
+def get_term_feature(id_, cont, idfs, q):
     
-    tfs = np.zeros((len(text_data), dfs.size), dtype=[("file", "a200"),("term", "a30"), ("tf", "f4")])
-    tfs["term"] = dfs["term"]
+    tf = np.zeros(idfs.size, dtype=[("id", "a250"), ("term", "a30"), ("tf", "f4"), ("lv_tf", "f4"), ("length", "f4"), ("norm", "f4")])
     
-    for i, (file_path, file_cont) in enumerate(text_data.items()):
-        tfs[i]["file"] = file_path
-        for term in file_cont:
-            for j in range(tfs.shape[1]):
-                if term.encode() == tfs[i][j]["term"]:
-                    tfs[i][j]["tf"] += 1
-                    continue
-    
-    lv_tfs = np.zeros(tfs.shape, dtype=[("file", "a250"),("term", "a30"), ("tf", "f4")])
-    lv_tfs["tf"] = np.log(tfs["tf"]) + 1
-    lv_tfs[np.isnan(lv_tfs["tf"])] = 0
-    lv_tfs[np.isinf(lv_tfs["tf"])] = 0
-    lv_tfs["term"] = tfs["term"]
-    lv_tfs["file"] = tfs["file"]
-    
-    return lv_tfs
+    tf["id"] = id_
+    tf["term"] = idfs["term"]
+    tf["length"] = len(cont)
+    for term in cont:
+        tf["tf"][tf["term"] == term.encode()] += 1
+    tf["lv_tf"] = np.log(tf["tf"]) + 1
+    tf["lv_tf"][np.isinf(tf["lv_tf"])] = 0
 
-def tfidf_creation(tfs, idfs):
+    q.put(tf)
+
+def tfidf_creation(text_data, idfs):
     
-    tf_idfs = np.zeros(tfs.shape, dtype=[("file", "a250"),("term", "a30"), ("tf_idf", "f4")])
+    tfs = np.zeros((len(text_data), idfs.size), dtype=[("id", "a250"), ("term", "a30"), ("tf", "f4"), ("lv_tf", "f4"), ("length", "f4"), ("norm", "f4")])
+    
+    q = Manager().Queue()
+    pool = Pool(processes=8)
+    for id_, cont in text_data.items():
+        pool.apply_async(get_term_feature, args=(id_, cont, idfs, q))
+    pool.close()
+    pool.join()
+
+    for i in range(len(text_data)):
+        tfs[i] = q.get()
+
+    tfs["norm"] = 1.0 / (1 + np.exp(- (tfs["length"] - np.min(tfs["length"])) / (np.max(tfs["length"]) - np.min(tfs["length"]))))
+
+    tf_idfs = np.zeros(tfs.shape, dtype=[("id", "a250"),("term", "a30"), ("tf_idf", "f4"), ("norm", "f4")])
     idfs = np.tile(idfs, (tfs.shape[0], 1))
-    tf_idfs["tf_idf"] = np.multiply(tfs["tf"], idfs["idf"])
+    tf_idfs["tf_idf"] = np.multiply(tfs["lv_tf"], idfs["idf"])
+    tf_idfs["id"] = tfs["id"]
+    tf_idfs["term"] = tfs["term"]
+    tf_idfs["norm"] = tfs["norm"]
+    
     return tf_idfs
 
