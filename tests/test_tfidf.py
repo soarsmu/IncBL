@@ -12,7 +12,7 @@ def test_tfidf_creation():
     
     tf_idfs = tfidf_creation(bug_data, idfs)
 
-    print(tf_idfs)
+    # print(tf_idfs)
     
 
 if __name__=="__main__":
