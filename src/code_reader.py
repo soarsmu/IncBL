@@ -1,9 +1,9 @@
 import os
 from tree_sitter import Language, Parser
-from multiprocessing import Queue, Pool, Manager
+from multiprocessing import Pool
 from src.text_processor import text_processor
 
-def code_reader(code_file, file_type, q):
+def code_reader(code_file, file_type):
     
     code_data = {}
     with open(code_file) as f:
@@ -11,7 +11,7 @@ def code_reader(code_file, file_type, q):
             code_data[code_file] = code_parser(f.read(), file_type)
     code_data = text_processor(code_data)
     
-    q.put(code_data)
+    return code_data
 
 def mp_code_reader(code_base_path, file_type):
 
@@ -19,15 +19,12 @@ def mp_code_reader(code_base_path, file_type):
     
     code_files = filter_files(code_base_path, file_type)
 
-    q = Manager().Queue()
     pool = Pool(processes=8)
     for code_file in code_files:
-        pool.apply_async(code_reader, args=(code_file[0], code_file[1], q))
+        pool.apply_async(code_reader, args=(code_file[0], code_file[1]), callback=code_data.update)
+    
     pool.close()
     pool.join()
-
-    for code_file in code_files:
-        code_data.update(q.get())
 
     return code_data
 
