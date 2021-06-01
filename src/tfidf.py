@@ -1,6 +1,6 @@
 import numpy as np
 from gensim.corpora import Dictionary
-from multiprocessing import Queue, Pool, Manager
+from multiprocessing import Pool
 
 def get_docu_feature(text_data):
 
@@ -18,7 +18,7 @@ def get_docu_feature(text_data):
 
     return idfs
 
-def get_term_feature(id_, cont, idfs, q):
+def get_term_feature(id_, cont, idfs):
     
     tf = np.zeros(idfs.size, dtype=[("id", "a250"), ("term", "a30"), ("tf", "f4"), ("lv_tf", "f4"), ("length", "f4"), ("norm", "f4")])
     
@@ -29,23 +29,20 @@ def get_term_feature(id_, cont, idfs, q):
         tf["tf"][tf["term"] == term.encode()] += 1
     tf["lv_tf"] = np.log(tf["tf"]) + 1
     tf["lv_tf"][np.isinf(tf["lv_tf"])] = 0
-
-    q.put(tf)
+    
+    return tf
 
 def tfidf_creation(text_data, idfs):
     
-    tfs = np.zeros((len(text_data), idfs.size), dtype=[("id", "a250"), ("term", "a30"), ("tf", "f4"), ("lv_tf", "f4"), ("length", "f4"), ("norm", "f4")])
-    
-    q = Manager().Queue()
+    tfs = []
+
     pool = Pool(processes=8)
-    for id_, cont in text_data.items():
-        pool.apply_async(get_term_feature, args=(id_, cont, idfs, q))
+    for i, (id_, cont) in enumerate(text_data.items()):
+        pool.apply_async(get_term_feature, args=(id_, cont, idfs), callback= tfs.append)
     pool.close()
     pool.join()
 
-    for i in range(len(text_data)):
-        tfs[i] = q.get()
-
+    tfs = np.array(tfs)
     tfs["norm"] = 1.0 / (1 + np.exp(- (tfs["length"] - np.min(tfs["length"])) / (np.max(tfs["length"]) - np.min(tfs["length"]))))
 
     tf_idfs = np.zeros(tfs.shape, dtype=[("id", "a250"),("term", "a30"), ("tf_idf", "f4"), ("norm", "f4")])
