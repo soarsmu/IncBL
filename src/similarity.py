@@ -1,46 +1,33 @@
-"""
-use Faiss or gensim to get cos similarity
-"""
-
+import os
+import math
+import numpy as np
+from itertools import product
+from more_itertools import map_reduce, flatten
+from gensim.models import TfidfModel
+from gensim.corpora import Dictionary
 from gensim.similarities import SparseMatrixSimilarity
 
-def compute_bugs_simi():
-    """
-    use Faiss or gensim to get cos similarity between bugs
+def compute_similarity(bug_vector, code_vector):
+    # alpha = 0.2
+    similarity = np.zeros((bug_vector.shape[0], code_vector.shape[0]), dtype=[("bug", "a30"),("file", "a250"), ("score", "f4")])
 
-    Args: two dict, {path: bug information}, {ID: bug information}
-
-    Returns: number
-    """
-    pass
-
-
-# TODO: use length function
-def normalization():
-    """
-    use length function to normalization
-
-    Args: dict, {path: code content}
-
-    Returns: number
-    """
-    pass
-
-
-def compute_similarity(bug_data, code_data, dct, model):
-    """
-    use gensim to get cos similarity between bugs and codes
-
-    Args: url, api keys
-
-    Returns: number
-    """
-    similarity = {}
-
-    index = SparseMatrixSimilarity(model[code_data.values()], len(dct.token2id.keys()))
-
-    for bug_id, bug_cont in bug_data.items():
-        similarity[bug_id] = sorted(zip(code_data.keys(), index[model[dct.doc2bow(bug_cont)]]), key=lambda item: -item[1]) 
+    for i in range(bug_vector.shape[0]):
+        similarity[i]["bug"] = bug_vector[i]["id"][0]
+        # TODO: update_past_bugs()
+        for j in range(code_vector.shape[0]):
+            similarity[i][j]["file"] = code_vector[j]["id"][0]
+            similarity[i][j]["score"] = (0.5 + 0.5 * np.sum(bug_vector[i]["tf_idf"] * code_vector[j]["tf_idf"])/(np.linalg.norm(bug_vector[i]["tf_idf"]) * np.linalg.norm(code_vector[j]["tf_idf"]))) * code_vector[j]["norm"][0]
 
     return similarity
 
+# def bugs_similarity(bug_vector, fixed_files, bug_data):
+    
+#     value_key_pairs = flatten(product(v,(k,)) for k,v in fixed_files.items())
+#     fixed_files = dict(map_reduce(value_key_pairs, lambda k:k[0], lambda k:k[1]))
+    
+#     return 
+
+# def update_past_bugs(fixed_files):
+#     value_key_pairs = flatten(product(v,(k,)) for k,v in fixed_files.items())
+#     fixed_files = dict(map_reduce(value_key_pairs, lambda k:k[0], lambda k:k[1]))
+#     return past_bugs

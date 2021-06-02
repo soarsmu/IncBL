@@ -1,50 +1,28 @@
-"""
-Database connection/creation, collection connection/creation/update
+from src.incbl import incbl
+import mysql.connector
 
-web api
-"""
-from pymongo import MongoClient
-
-db_conn = MongoClient("localhost")
+incbl_db = mysql.connector.connect(
+  host="localhost",
+  user="root",
+  passwd="123456"
+)
 
 def code_insert():
 
     pass
 
-
 def code_delete():
 
     pass
-
 
 def code_update():
 
     pass
 
-
 def bugs_insert():
 
     pass
 
-# # user_id: local_test
-
-# repos:{
-
-# ​	repoA: {
-
-# ​			repo_contents:{
-
-# ​									filepath: tf, {bugid: tf}, 
-
-# ​									filepath: tf, {bugid: tf}
-
-# ​									}
-
-# ​			df:{}
-
-# ​	}
-
-# }
 # TODO: get repo file content
 def get_repo_files():
     """
@@ -66,8 +44,6 @@ def get_issue_content():
     """
     pass
 
-
-# TODO: web api to send issue
 def send_issue_comment():
     """
     use Github API to send_issue_comment
@@ -75,7 +51,6 @@ def send_issue_comment():
     Args: url, api keys, results
     """
     pass
-
 
 # TODO: web api to get pull_request
 def update_repo_files():
@@ -86,8 +61,6 @@ def update_repo_files():
     """
     pass
 
-
-# TODO: web api to send pull_request comments
 def send_pr_comment():
     """
     use Github API to get PR code and update local files

@@ -1,83 +1,60 @@
 import os
 import time
-from src.bug_reader import bug_reader_local
-from src.code_reader import code_reader
-from src.tfidf import tfidf_computing
+import numpy as np
+import warnings
+warnings.filterwarnings("ignore")
+from src.bug_reader import bug_reader
+from src.code_reader import mp_code_reader
+from src.tfidf import get_docu_feature, get_term_feature, tfidf_creation
 from src.similarity import compute_similarity
+from src.evaluation import evaluation
 
 class incbl():
 
-    def __init__(self, bug_report_path, code_base_path, file_extension):
-        """
-        read bug reports and code
-        read index and model if have
-        read fixed_bugs
-        """
+    def __init__(self, bug_report_path, code_base_path, file_type):
+        
         self.bug_report_path = bug_report_path
         self.code_base_path = code_base_path
-        self.file_extension = file_extension
-        self.results = {}
+        self.file_type = file_type
 
     def localization(self):
-        """
-        query part
         
-        Args: index, model
-
-        Returns: dict, {ID: path}
-        """
-        print("\n localization starting...\n")
+        print("bug localization starting...")
+        
         start_time = time.time()
+        print("read bug reports...")
+        bug_data, fixed_files = bug_reader(self.bug_report_path, self.code_base_path, self.file_type)
+        print("the time consuming is %f s" %(time.time() - start_time))
 
-        # TODO: history info and normalization
-        bug_data, fixed_files = bug_reader_local(self.bug_report_path)
-        code_data, dct, model = tfidf_computing(code_reader(self.code_base_path, self.file_extension))
+        start_time = time.time()
+        print("read code files...")
+        code_data = mp_code_reader(self.code_base_path, self.file_type)
+        print("the time consuming is %f s" %(time.time() - start_time))
 
-        self.results = compute_similarity(bug_data, code_data, dct, model)
-        print("the time overhead is ", time.time()-start_time, "\n The results is\n")
+        start_time = time.time()
+        print("get the document-level features...")
+        idfs = get_docu_feature(code_data)
+        print("the time consuming is %f s" %(time.time() - start_time))
 
-        for bug_id, code_paths in self.results.items():
-            print(bug_id + ":" + "\n")
-            for code_path in code_paths:
-                if code_path[1] >= 0.15:
-                    print("\t" + code_path[0] + "\t" + str(code_path[1]))
+        start_time = time.time()
+        print("get the term-level features...")
+        bug_vector = tfidf_creation(bug_data, idfs)
+        code_vector = tfidf_creation(code_data, idfs)
+        print("the time consuming is %f s" %(time.time() - start_time))
+        
+        start_time = time.time()
+        print("compute similarities...")
+        similarity = compute_similarity(bug_vector, code_vector)
+        print("the time consuming is %f s" %(time.time() - start_time))
+        similarity["score"] = -similarity["score"]
+        similarity = np.sort(similarity, order = "score")[:,:9]
+        similarity["score"] = -similarity["score"]
+        print(similarity)
+        
+        print("evaluation start...")
+        evaluation(fixed_files, similarity)
 
-    def evaluation(self):
-        """
-        computing the MAP, ACC, MRR values if have ground truth
-
-        Args: two dict, {ID: results}, {ID: fixed files} 
-
-        Returns: numbers, MAP, ACC, MRR values
-        """
-        print("\n evaluation starting...\n")
-        bug_data, fixed_files = bug_reader_local(self.bug_report_path)
-        acc = 0
-        map_value = 0
-
-        truth_num = 0
-        for bug_id, file_paths in fixed_files.items():
-            temp = 0
-            map_tmp = 0
-            for file_path in file_paths:
-                truth_num += 1
-                file_path = os.path.join(self.code_base_path, file_path)
-                for i, result in enumerate(self.results[bug_id]):
-                    if result[0] == file_path and i < 10:
-                        acc +=1
-
-                        temp += 1
-                        map_tmp += temp/(i+1.0)
-
-            if not temp == 0:
-                map_value += map_tmp / temp 
-
-        acc /= truth_num
-        map_value /= len(fixed_files)
-        print("\t The accuracy @ top 10 is", acc, "\n", "\t The MAP @ top 10 is", map_value)
-                    
-
-
+       
     def tf_update(self):
         """
         update index matrices
