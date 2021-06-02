@@ -1,4 +1,7 @@
+import pickle
 import numpy as np
+from bson.binary import Binary
+from src.utils import db
 from gensim.corpora import Dictionary
 from multiprocessing import Pool
 
@@ -14,7 +17,10 @@ def get_docu_feature(text_data):
         
     idfs = np.zeros(len(dct), dtype=[("term", "a30"), ("idf", "f4")])
     idfs["term"] = dfs["term"]
+    
     idfs["idf"] = np.log(len(text_data)/dfs["df"])
+    db.insert_one({"dfs": dfs.tolist()})
+    db.insert_one({"idfs": idfs.tolist()})
 
     return idfs
 
@@ -44,13 +50,26 @@ def tfidf_creation(text_data, idfs):
 
     tfs = np.array(tfs)
     tfs["norm"] = 1.0 / (1 + np.exp(- (tfs["length"] - np.min(tfs["length"])) / (np.max(tfs["length"]) - np.min(tfs["length"]))))
-
+    db.insert_one({"tfs": Binary(pickle.dumps(tfs, protocol=2))})
+    print(pickle.loads)
     tf_idfs = np.zeros(tfs.shape, dtype=[("id", "a250"),("term", "a30"), ("tf_idf", "f4"), ("norm", "f4")])
     idfs = np.tile(idfs, (tfs.shape[0], 1))
     tf_idfs["tf_idf"] = np.multiply(tfs["lv_tf"], idfs["idf"])
     tf_idfs["id"] = tfs["id"]
     tf_idfs["term"] = tfs["term"]
     tf_idfs["norm"] = tfs["norm"]
-    
+    db.insert_one({"tf_idfs": Binary(pickle.dumps(tf_idfs, protocol=2))})
+
     return tf_idfs
 
+def update_term_feature():
+
+    pass
+
+def update_docu_feature():
+
+    pass
+
+def update_tfidf_feature():
+
+    pass
