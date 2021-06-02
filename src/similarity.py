@@ -1,11 +1,4 @@
-import os
-import math
 import numpy as np
-from itertools import product
-from more_itertools import map_reduce, flatten
-from gensim.models import TfidfModel
-from gensim.corpora import Dictionary
-from gensim.similarities import SparseMatrixSimilarity
 
 def compute_similarity(bug_vector, code_vector):
     # alpha = 0.2
@@ -19,15 +12,3 @@ def compute_similarity(bug_vector, code_vector):
             similarity[i][j]["score"] = (0.5 + 0.5 * np.sum(bug_vector[i]["tf_idf"] * code_vector[j]["tf_idf"])/(np.linalg.norm(bug_vector[i]["tf_idf"]) * np.linalg.norm(code_vector[j]["tf_idf"]))) * code_vector[j]["norm"][0]
 
     return similarity
-
-# def bugs_similarity(bug_vector, fixed_files, bug_data):
-    
-#     value_key_pairs = flatten(product(v,(k,)) for k,v in fixed_files.items())
-#     fixed_files = dict(map_reduce(value_key_pairs, lambda k:k[0], lambda k:k[1]))
-    
-#     return 
-
-# def update_past_bugs(fixed_files):
-#     value_key_pairs = flatten(product(v,(k,)) for k,v in fixed_files.items())
-#     fixed_files = dict(map_reduce(value_key_pairs, lambda k:k[0], lambda k:k[1]))
-#     return past_bugs
