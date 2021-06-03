@@ -1,4 +1,3 @@
-from operator import add
 import os
 import json
 from hashlib import md5
@@ -8,13 +7,13 @@ from src.text_processor import text_processor
 
 def mp_code_reader(code_base_path, file_type, storage_path):
 
+    added_files, deleted_files, modified_files = filter_files(code_base_path, file_type, storage_path)
+
     if os.path.exists(os.path.join(storage_path, "code_data.json")):
         with open(os.path.join(storage_path, "code_data.json"), "r") as f:
             code_data = json.load(f)
-    else: 
+    else:
         code_data = {}
-    
-    added_files, deleted_files, modified_files = filter_files(code_base_path, file_type, storage_path)
 
     if len(added_files):
         pool = mp.Pool(mp.cpu_count())
@@ -64,17 +63,18 @@ def filter_files(code_base_path, file_type, storage_path):
                     code_cont = open(code_file, "rb")
                     md5_val = md5(code_cont.read()).hexdigest()
                     code_cont.close()
+                    
                     if not md5_val == code_data[code_file]["md5"]:
-                        code_data[code_file]["md5"] = md5_val
+                        code_data[code_file].update({"md5": md5_val})
                         modified_files.append([code_file, code_file.split(".")[-1].strip()])
 
             f.seek(0)
+            f.truncate(0)
             json.dump(code_data, f)
-            f.truncate()
     else:
         for code_file in code_files:
             added_files.append([code_file, code_file.split(".")[-1].strip()])
-
+    
     return added_files, deleted_files, modified_files
 
 def added_files_reader(code_file, file_type):
