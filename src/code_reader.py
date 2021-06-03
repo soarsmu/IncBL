@@ -1,49 +1,67 @@
+from operator import add
 import os
+import json
 from hashlib import md5
-from tree_sitter import Language, Parser
 import multiprocessing as mp
-from src.utils import db
+from tree_sitter import Language, Parser
 from src.text_processor import text_processor
 
-def code_reader(code_file, file_type):
+def added_files_reader(code_file, file_type):
+    
+    code_data = {}
+
+    with open(code_file, "rb") as f:
+        if os.path.getsize(code_file):
+            code_cont = f.read()
+            md5_val = md5(code_cont).hexdigest()
+            code_data[code_file] = {"file_content": text_processor(code_parser(code_cont, file_type)), "md5": md5_val}
+    
+    return code_data
+
+def modified_files_reader(code_file, file_type, original_data):
     
     code_data = {}
 
     with open(code_file) as f:
-        if f.read(1):
-            code_cont = f.read()
-            md5_val = md5(code_cont.encode()).hexdigest()
-
-            if db.find({"md5": str(md5_val)}).count() == 0:
-                db.remove({"file_path": code_file})
-                code_data[code_file] = code_parser(code_cont, file_type)
-                code_data = text_processor(code_data)
-                db.insert_one({"file_path": code_file, "file_content": code_data[code_file], "md5": str(md5_val)})
+        if os.path.getsize(code_file):
+            code_data[code_file] = {"file_content": text_processor(code_parser(code_cont, file_type)), "md5": original_data[code_file]["md5"]}
     
     return code_data
 
-def mp_code_reader(code_base_path, file_type):
+def mp_code_reader(code_base_path, file_type, storage_path):
 
-    code_data = {}
+    if os.path.exists(os.path.join(storage_path, "code_data.json")):
+        with open(os.path.join(storage_path, "code_data.json"), "r") as f:
+            code_data = json.load(f)
+    else: 
+        code_data = {}
+
+    added_files, deleted_files, modified_files = filter_files(code_base_path, file_type)
+
+    if len(added_files):
+        pool = mp.Pool(mp.cpu_count())
+        for code_file in added_files:
+            pool.apply_async(added_files_reader, args=(code_file[0], code_file[1]), callback=code_data.update)
+        pool.close()
+        pool.join()
+
+    if len(modified_files):
+        pool = mp.Pool(mp.cpu_count())
+        for code_file in modified_files:
+            pool.apply_async(modified_files_reader, args=(code_file[0], code_file[1], code_data), callback=code_data.update)
+        pool.close()
+        pool.join()
     
-    code_files = filter_files(code_base_path, file_type)
-    print(code_files)
-    pool = mp.Pool(mp.cpu_count())
-    for code_file in code_files:
-        pool.apply_async(code_reader, args=(code_file[0], code_file[1]), callback=code_data.update)
-        
-    pool.close()
-    pool.join()
+    with open(os.path.join(storage_path, "code_data.json"), "w") as f:
+        json.dump(code_data, f)
 
-    return code_data
+    return code_data, deleted_files
 
-def filter_files(code_base_path, file_type):
+def filter_files(code_base_path, file_type, storage_path):
 
-    for res in db.find({}, {"file_path": 1}):
-        if not os.path.exists(res["file_path"]):
-            db.remove({"file_path": res["file_path"]})
-
-    filtered_files = []
+    added_files = []
+    deleted_files = []
+    modified_files = []
     code_files = []
 
     dir_path = os.walk(code_base_path)
@@ -52,15 +70,33 @@ def filter_files(code_base_path, file_type):
             if file_name.split(".")[-1].strip() in file_type:
                 code_files.append(os.path.join(parent_dir, file_name))
 
-    for res in db.find({}, {"file_path": 1}):
-        if not res["file_path"] in code_files:
-            db.remove({"file_path": res["file_path"]})
+    if os.path.exists(os.path.join(storage_path, "code_data.json")):
+        with open(os.path.join(storage_path, "code_data.json"), "r+") as f:
+            code_data = json.load(f)
 
-    for code_file in code_files:
-        if db.find({"file_path": code_file}).count() == 0:
-            filtered_files.append([code_file, code_file.split(".")[-1].strip()])
+            for file_path in code_data.keys():
+                if not file_path in code_files:
+                    deleted_files.append(file_path)
+                    del code_data[file_path]
 
-    return filtered_files
+            for code_file in code_files:
+                if not code_file in code_data.keys():
+                    added_files.append([code_file, code_file.split(".")[-1].strip()])
+                else:
+                    code_cont = open(code_file, "rb")
+                    md5_val = md5(code_cont.read()).hexdigest()
+                    code_cont.close()
+                    if not md5_val == code_data[code_file]["md5"]:
+                        code_data[code_file]["md5"] = md5_val
+                        modified_files.append([code_file, code_file.split(".")[-1].strip()])
+
+            f.seek(0)
+            json.dump(code_data, f)
+            f.truncate()
+    else:
+        added_files = code_files
+
+    return added_files, deleted_files, modified_files
 
 def code_parser(code_cont, file_type):
 
