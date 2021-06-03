@@ -56,21 +56,25 @@ def tfidf_creation(text_data, idfs, storage_path):
     np.save(os.path.join(storage_path, "tfs.npy"), tfs)
 
     tf_idfs = np.zeros(tfs.shape, dtype=[("id", "a250"),("term", "a30"), ("tf_idf", "f4"), ("norm", "f4")])
-    idfs = np.tile(idfs, (tfs.shape[0], 1))
-    
+        
     tf_idfs["tf_idf"] = np.multiply(tfs["lv_tf"], idfs["idf"])
     tf_idfs["id"] = tfs["id"]
     tf_idfs["term"] = tfs["term"]
     tf_idfs["norm"] = tfs["norm"]
-    # np.save(os.path.join(storage_path, "tf_idfs.npy"), tf_idfs)
-
+    np.save(os.path.join(storage_path, "tf_idfs.npy"), tf_idfs)
     return tf_idfs
 
 def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, storage_path):
     
+    tf_idfs = np.load(os.path.join(storage_path, "tf_idfs.npy"))
+    if len(deleted_files) + len(added_files) + len(modified_files) == 0:
+        return tf_idfs
+
     tfs = np.load(os.path.join(storage_path, "tfs.npy"))
     dfs = np.load(os.path.join(storage_path, "dfs.npy"))
     idfs = np.load(os.path.join(storage_path, "idfs.npy"))
+    
+
     min_length = np.min(tfs["length"])
     max_length = np.max(tfs["length"])
     
@@ -90,6 +94,7 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
                 tfs[i]["length"] = len(text_data[code_file]["content"])
                 tfs[i]["norm"] = 1.0 / (1 + np.exp(- (tfs[i]["length"] - min_length) / (max_length - min_length)))
                 tf_temp = np.zeros(dfs.size, dtype=[("term", "a30"), ("tf", "f4")])
+                tf_temp["term"] = dfs["term"]
                 for term in text_data[code_file]["content"]:
                     if term.encode() in tfs[i]["term"]:
                         tf_temp["tf"][tf_temp["term"] == term.encode()] += 1
@@ -97,10 +102,9 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
                         temp = np.zeros([tfs.shape[0], 1], dtype=[("id", "a250"), ("term", "a30"), ("tf", "f4"), ("lv_tf", "f4"), ("length", "f4"), ("norm", "f4")])
                         temp["term"] = term.encode()
                         tfs = np.concatenate((tfs, temp), 1)
-                        tf_temp = np.concatenate((tf_temp, [(term.encode(), 0)]), 1)
-                        dfs = np.concatenate((dfs, [(term.encode(), 0)]), 1)
-                        idfs = np.concatenate((idfs, [(term.encode(), 0)]), 1)
-                        print(idfs)
+                        tf_temp = np.concatenate((tf_temp, np.asarray([(term.encode(), 0)], dtype=[("term", "a30"), ("tf", "f4")])))
+                        dfs = np.concatenate((dfs, np.asarray([(term.encode(), 0)], dtype=[("term", "a30"), ("df", "f4")])))
+                        idfs = np.concatenate((idfs, np.asarray([(term.encode(), 0)], dtype=[("term", "a30"), ("idf", "f4")])))
                         tf_temp["tf"][tf_temp["term"] == term.encode()] += 1
                 for term in dfs["term"]:
                     update_val = tf_temp["tf"][tf_temp["term"] == term] - tfs[i]["tf"][tf_temp["term"] == term]
@@ -114,13 +118,15 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
 
     for code_file in added_files:
         code_file = code_file[0]
-        temp = np.zeros(tfs.shape[1], dtype=[("id", "a250"), ("term", "a30"), ("tf", "f4"), ("lv_tf", "f4"), ("length", "f4"), ("norm", "f4")])
+        temp = np.zeros([1, tfs.shape[1]], dtype=[("id", "a250"), ("term", "a30"), ("tf", "f4"), ("lv_tf", "f4"), ("length", "f4"), ("norm", "f4")])
         temp["id"] = code_file.encode()
-        temp["term"] = tfs["term"][0]
+        if not tfs["term"].size == 0:
+            temp["term"] = tfs["term"][0]
         temp["length"] = len(text_data[code_file]["content"])
         temp["norm"] = 1.0 / (1 + np.exp(- (temp["length"] - min_length) / (max_length - min_length)))
         tfs = np.concatenate((tfs, temp), 0)
         tf_temp = np.zeros(dfs.size, dtype=[("term", "a30"), ("tf", "f4")])
+        tf_temp["term"] = dfs["term"]
         for term in text_data[code_file]["content"]:
             if term.encode() in tfs[-1]["term"]:
                 tf_temp["tf"][tf_temp["term"] == term.encode()] += 1
@@ -128,10 +134,9 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
                 temp = np.zeros([tfs.shape[0], 1], dtype=[("id", "a250"), ("term", "a30"), ("tf", "f4"), ("lv_tf", "f4"), ("length", "f4"), ("norm", "f4")])
                 temp["term"] = term.encode()
                 tfs = np.concatenate((tfs, temp), 1)
-                tf_temp = np.concatenate((tf_temp, [(term.encode(), 0)]), 1)
-                dfs = np.concatenate((dfs, [(term.encode(), 0)]), 1)
-                idfs = np.concatenate((idfs, [(term.encode(), 0)]), 1)
-                print(idfs)
+                tf_temp = np.concatenate((tf_temp, np.asarray([(term.encode(), 0)], dtype=[("term", "a30"), ("tf", "f4")])))
+                dfs = np.concatenate((dfs, np.asarray([(term.encode(), 0)], dtype=[("term", "a30"), ("df", "f4")])))
+                idfs = np.concatenate((idfs, np.asarray([(term.encode(), 0)], dtype=[("term", "a30"), ("idf", "f4")])))
                 tf_temp["tf"][tf_temp["term"] == term.encode()] += 1
         for term in dfs["term"]:
             update_val = tf_temp["tf"][tf_temp["term"] == term] - tfs[-1]["tf"][tf_temp["term"] == term]
@@ -153,8 +158,7 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
         tfs["norm"] = 1.0 / (1 + np.exp(- (tfs["length"] - np.min(tfs["length"])) / (np.max(tfs["length"]) - np.min(tfs["length"]))))
     
     tf_idfs = np.zeros(tfs.shape, dtype=[("id", "a250"),("term", "a30"), ("tf_idf", "f4"), ("norm", "f4")])
-
-    # idfs = np.tile(idfs, (tfs.shape[0], 1))
+    
     tf_idfs["tf_idf"] = np.multiply(tfs["lv_tf"], idfs["idf"])
     tf_idfs["id"] = tfs["id"]
     tf_idfs["term"] = tfs["term"]
@@ -163,5 +167,6 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
     np.save(os.path.join(storage_path, "tfs.npy"), tfs)
     np.save(os.path.join(storage_path, "dfs.npy"), dfs)
     np.save(os.path.join(storage_path, "idfs.npy"), idfs)
+    np.save(os.path.join(storage_path, "tf_idfs.npy"), tf_idfs)
 
     return tf_idfs
