@@ -52,7 +52,6 @@ class incbl():
         else:
             start_time = time.time()
             print("update tfidf model...")
-            print(added_files, deleted_files, modified_files)
             code_vector = update_tfidf_feature(code_data, added_files, deleted_files, modified_files, self.code_storage_path)
             print("the time consuming is %f s" %(time.time() - start_time))
 
