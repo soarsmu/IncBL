@@ -30,7 +30,7 @@ class incbl():
         
         start_time = time.time()
         print("read bug reports...")
-        bug_data = bug_reader(self.bug_report_path, self.code_base_path, self.file_type, self.bug_storage_path)
+        bug_data, past_bugs = bug_reader(self.bug_report_path, self.code_base_path, self.file_type, self.bug_storage_path)
         print("the time consuming is %f s" %(time.time() - start_time))
 
         start_time = time.time()
@@ -60,7 +60,7 @@ class incbl():
 
         start_time = time.time()
         print("compute similarities...")
-        similarity = compute_similarity(bug_vector, code_vector)
+        similarity = compute_similarity(bug_vector, code_vector, bug_data, past_bugs, self.bug_storage_path)
         print("the time consuming is %f s" %(time.time() - start_time))
         similarity["score"] = -similarity["score"]
         similarity = np.sort(similarity, order = "score")[:,:9]
@@ -68,4 +68,3 @@ class incbl():
         self.results = similarity
         print(self.results)
         evaluation(self.results, bug_data)
-

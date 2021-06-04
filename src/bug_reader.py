@@ -20,7 +20,9 @@ def bug_reader(bug_report_path, code_base_path, file_type, storage_path):
                 fixed_files.append(os.path.join(code_base_path, file_path.text))
         bug_data[child.get("id")] = {"content": bug_content, "fixed_files": fixed_files}
         
-    with open(os.path.join(storage_path + "bug_data.json"), "a") as f:
-        json.dump(bug_data, f)
+    past_bugs = {}
+    if os.path.exists(os.path.join(storage_path + "bug_data.json")):
+        with open(os.path.join(storage_path + "bug_data.json"), "r") as f:
+            past_bugs = json.load(f)
 
-    return bug_data
+    return bug_data, past_bugs

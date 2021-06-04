@@ -163,7 +163,7 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
             temp["term"] = tf_idfs["term"][0]
         temp["norm"] = tfs[-1]["norm"]
         tf_idfs = np.concatenate((tf_idfs, temp), 0)
-                
+
         # store new tf value
         tf_temp = np.zeros(dfs.size, dtype=[("term", "a30"), ("tf", "f4")])
         tf_temp["term"] = dfs["term"]
