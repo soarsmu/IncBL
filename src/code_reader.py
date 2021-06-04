@@ -60,8 +60,8 @@ def filter_files(code_base_path, file_type, storage_path):
                 if not code_file in code_data.keys():
                     added_files.append([code_file, code_file.split(".")[-1].strip()])
                 else:
-                    code_cont = open(code_file, "rb")
-                    md5_val = md5(code_cont.read()).hexdigest()
+                    code_cont = open(code_file)
+                    md5_val = md5(code_cont.read().encode()).hexdigest()
                     code_cont.close()
                     
                     if not md5_val == code_data[code_file]["md5"]:
