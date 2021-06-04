@@ -56,7 +56,7 @@ def tfidf_creation(text_data, idfs, storage_path):
     np.save(os.path.join(storage_path, "tfs.npy"), tfs)
 
     tf_idfs = np.zeros(tfs.shape, dtype=[("id", "a250"),("term", "a30"), ("tf_idf", "f4"), ("norm", "f4")])
-        
+    
     tf_idfs["tf_idf"] = np.multiply(tfs["lv_tf"], idfs["idf"])
     tf_idfs["id"] = tfs["id"]
     tf_idfs["term"] = tfs["term"]
@@ -82,12 +82,17 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
         update_val = math.log(len(text_data)) - math.log(original_num)
         idfs["idf"] += update_val
 
-    # for deleted files, delete the corresponding row in the tf array 
-    for code_file in deleted_files:
-        if not np.where(tfs["id"] == code_file.encode())[0].size == 0:
-            tfs = np.delete(tfs, np.where(tfs["id"] == code_file.encode())[0][0], 0)
-            tf_idfs = np.delete(tf_idfs, np.where(tf_idfs["id"] == code_file.encode())[0][0], 0)
-
+    count = np.zeros(dfs.size, dtype=[("term", "a30"), ("count", "f4")])
+    count["term"] = dfs["term"]
+    count["count"] = np.sum(tfs["tf"], 0)
+    
+    # for deleted files, delete the corresponding row in the tf array and change df
+    for code_file in deleted_files:   
+        tfs = np.delete(tfs, np.where(tfs["id"] == code_file.encode())[0][0], 0)
+        tf_idfs = np.delete(tf_idfs, np.where(tf_idfs["id"] == code_file.encode())[0][0], 0)
+    count["count"] = count["count"] - np.sum(tfs["tf"], 0)
+    dfs["df"] = dfs["df"] - count["count"]
+    
     # for modified files, update tf value, df value, and add terms
     for code_file in modified_files:
         code_file = code_file[0]
@@ -112,7 +117,7 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
                         tfs = np.concatenate((tfs, temp), 1)
                         
                         # add new term to tf_idf array
-                        temp = np.zeros([tf_idf.shape[0], 1], dtype=[("id", "a250"),("term", "a30"), ("tf_idf", "f4"), ("norm", "f4")])
+                        temp = np.zeros([tf_idfs.shape[0], 1], dtype=[("id", "a250"),("term", "a30"), ("tf_idf", "f4"), ("norm", "f4")])
                         temp["term"] = term.encode()
                         tf_idfs = np.concatenate((tf_idfs, temp), 1)
                         
@@ -125,12 +130,14 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
                 
                 # update df, idf, tf        
                 for term in dfs["term"]:
-                    update_val = tf_temp["tf"][tf_temp["term"] == term] - tfs[i]["tf"][tf_temp["term"] == term]
-                    if not update_val.size == 0:
-                        dfs[dfs["term"] == term]["df"] += update_val
+                    if (tf_temp["tf"][tf_temp["term"] == term] == 0) and not (tfs[i]["tf"][tf_temp["term"] == term] == 0):
+                        dfs[dfs["term"] == term] = np.asarray([(term, dfs[dfs["term"] == term]["df"] - 1.0)], dtype=[("term", "a30"), ("df", "f4")])
+                        idfs["idf"][idfs["term"] == term] = np.log(len(text_data)/(dfs["df"][dfs["term"] == term]+1))
+                    elif not (tf_temp["tf"][tf_temp["term"] == term] == 0) and (tfs[i]["tf"][tf_temp["term"] == term] == 0):
+                        dfs[dfs["term"] == term] = np.asarray([(term, dfs[dfs["term"] == term]["df"] + 1.0)], dtype=[("term", "a30"), ("df", "f4")])
                         idfs["idf"][idfs["term"] == term] = np.log(len(text_data)/(dfs["df"][dfs["term"] == term]+1))
                     tfs[i]["tf"][tf_temp["term"] == term] = tf_temp["tf"][tf_temp["term"] == term]
-                    
+
                 tfs[i]["lv_tf"] = np.log(tfs[i]["tf"]) + 1
                 tfs[i]["lv_tf"][np.isinf(tfs[i]["lv_tf"])] = 0
                 tf_idfs[i]["tf_idf"] = np.multiply(tfs[i]["lv_tf"], idfs["idf"])
@@ -183,12 +190,10 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
                 tf_temp = np.concatenate((tf_temp, np.asarray([(term.encode(), 0)], dtype=[("term", "a30"), ("tf", "f4")])))
                 tf_temp["tf"][tf_temp["term"] == term.encode()] += 1
         
-        # update tf, df, idf
+        # update df, idf, tf        
         for term in dfs["term"]:
-            update_val = tf_temp["tf"][tf_temp["term"] == term] - tfs[-1]["tf"][tf_temp["term"] == term]
-            if not update_val == 0:
-                dfs["df"][dfs["term"] == term] += update_val
-                idfs["idf"][idfs["term"] == term] = np.log(len(text_data)/(dfs["df"][dfs["term"] == term]+1))
+            dfs[dfs["term"] == term] = np.asarray([(term, dfs[dfs["term"] == term]["df"] + 1.0)], dtype=[("term", "a30"), ("df", "f4")])
+            idfs["idf"][idfs["term"] == term] = np.log(len(text_data)/(dfs["df"][dfs["term"] == term]+1))
             tfs[-1]["tf"][tf_temp["term"] == term] = tf_temp["tf"][tf_temp["term"] == term]
 
         tfs[-1]["lv_tf"] = np.log(tfs[-1]["tf"]) + 1
