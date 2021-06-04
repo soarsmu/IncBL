@@ -11,23 +11,19 @@
 - [x] Text processor
 	- [x] Tokenizer
 	- [x] Stummer and Stopwords removal
-- [ ] TF computing
+- [x] TF computing
 	- [x] TF matrix creation
-	- [ ] TF matrix update
-- [ ] IDF computing
+	- [x] TF matrix update
+- [x] IDF computing
 	- [x] IDF matrix creation
-	- [ ] IDF matrix update
-- [ ] Similarity Computing
-	- [ ] Bugs similarity
+	- [x] IDF matrix update
+- [x] Similarity Computing
+	- [x] Bugs similarity
 	- [x] Code files and bugs similarity
 	- [x] Normalization
 - [x] Bug Localization
     - [x] Ranking
     - [x] Evaluation
-- [ ] Data Storage (MongoDB)
-    - [ ] Code files storage and update
-    - [ ] Bug report storage and update
-	- [ ] matrix storage and update
 - [ ] GitHub Integration
 	- [ ] Clone and update repo
 	- [ ] Get and reply issues
