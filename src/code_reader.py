@@ -95,6 +95,7 @@ def modified_files_reader(code_file, file_type, original_data):
 
     with open(code_file) as f:
         if os.path.getsize(code_file):
+            code_cont = f.read()
             code_data[code_file] = {"content": text_processor(code_parser(code_cont, file_type)), "md5": original_data[code_file]["md5"]}
     
     return code_data
