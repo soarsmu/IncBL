@@ -50,8 +50,10 @@ def tfidf_creation(text_data, idfs, storage_path):
     pool.join()
 
     tfs = np.array(tfs)
-    for i in range(tfs.shape[0]):
-        tfs[i]["norm"] = 1.0 / (1 + np.exp(- 6 * (tfs[i]["length"] - np.min(tfs["length"])) / (np.max(tfs["length"]) - np.min(tfs["length"]))))
+    min_length = np.mean(tfs["length"], 0)[0] - 3*np.std(tfs["length"], 0)[0]
+    max_length = np.mean(tfs["length"], 0)[0] + 3*np.std(tfs["length"], 0)[0]
+    
+    tfs["norm"] = 1.0 / (1 + np.exp(- 6 * (tfs["length"] - min_length) / (max_length - min_length)))
     
     np.save(os.path.join(storage_path, "tfs.npy"), tfs)
 
@@ -64,7 +66,7 @@ def tfidf_creation(text_data, idfs, storage_path):
     np.save(os.path.join(storage_path, "tf_idfs.npy"), tf_idfs)
     return tf_idfs
 
-def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, storage_path, bug_storage_path):
+def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, storage_path):
     
     tf_idfs = np.load(os.path.join(storage_path, "tf_idfs.npy"))
     if len(deleted_files) + len(added_files) + len(modified_files) == 0:
@@ -74,8 +76,8 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
     dfs = np.load(os.path.join(storage_path, "dfs.npy"))
     idfs = np.load(os.path.join(storage_path, "idfs.npy"))
     
-    min_length = np.min(tfs["length"])
-    max_length = np.max(tfs["length"])
+    min_length = np.mean(tfs["length"], 0)[0] - 3*np.std(tfs["length"], 0)[0]
+    max_length = np.mean(tfs["length"], 0)[0] + 3*np.std(tfs["length"], 0)[0]
     
     original_num = len(text_data) + len(deleted_files) - len(added_files)
     if not len(deleted_files) - len(added_files) == 0:
@@ -208,12 +210,9 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
     # delete terms whose df==0
     tfs = np.delete(tfs, np.where(dfs["df"] == 0), 1)
     tf_idfs = np.delete(tf_idfs, np.where(dfs["df"] == 0), 1)
-    past_bugs_tfidf = np.load(os.path.join(bug_storage_path, "past_bugs_tfidf.npy"))
-    past_bugs_tfidf = np.delete(past_bugs_tfidf, np.where(dfs["df"] == 0), 1)
     idfs = np.delete(idfs, np.where(dfs["df"] == 0), 0)
     dfs = np.delete(dfs, np.where(dfs["df"] == 0), 0)
     
-
     # make id and norm same in each row
     for i in range(tfs.shape[0]):
         tfs[i]["id"] = tfs[i]["id"][0]
@@ -222,14 +221,14 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
         tf_idfs[i]["norm"] = tf_idfs[i]["norm"][0]
 
     # if min or max length changes, update the norm value in whole array
-    if not min_length == np.min(tfs["length"]) or not max_length == np.max(tfs["length"]):
-        tfs["norm"] = 1.0 / (1 + np.exp(- 6 *(tfs["length"] - np.min(tfs["length"])) / (np.max(tfs["length"]) - np.min(tfs["length"]))))
-        tf_idfs["norm"] = tfs["norm"]
+    if not min_length == (np.mean(tfs["length"], 0)[0] - 3*np.std(tfs["length"], 0)[0]) or not max_length == (np.mean(tfs["length"], 0)[0] + 3*np.std(tfs["length"], 0)[0]):
+        min_length = np.mean(tfs["length"], 0)[0] - 3*np.std(tfs["length"], 0)[0]
+        max_length = np.mean(tfs["length"], 0)[0] + 3*np.std(tfs["length"], 0)[0]
+        tfs["norm"] = 1.0 / (1 + np.exp(- 6 * (tfs["length"] - min_length) / (max_length - min_length)))
 
     np.save(os.path.join(storage_path, "tfs.npy"), tfs)
     np.save(os.path.join(storage_path, "dfs.npy"), dfs)
     np.save(os.path.join(storage_path, "idfs.npy"), idfs)
     np.save(os.path.join(storage_path, "tf_idfs.npy"), tf_idfs)
-    np.save(os.path.join(bug_storage_path, "past_bugs_tfidf.npy"), past_bugs_tfidf)
 
     return tf_idfs
