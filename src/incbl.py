@@ -16,6 +16,7 @@ class incbl():
         self.bug_report_path = bug_report_path
         self.code_base_path = code_base_path
         self.file_type = file_type
+        self.storage_path = os.path.join(storage_path)
         self.code_storage_path = os.path.join(storage_path, "code/")
         if not os.path.exists(self.code_storage_path):
             os.mkdir(os.path.join(storage_path, "code/"))
@@ -67,4 +68,4 @@ class incbl():
         similarity["score"] = -similarity["score"]
         self.results = similarity
         # print(self.results)
-        evaluation(self.results, bug_data)
+        evaluation(self.results, bug_data, self.storage_path)
