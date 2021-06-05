@@ -51,7 +51,7 @@ def tfidf_creation(text_data, idfs, storage_path):
 
     tfs = np.array(tfs)
     for i in range(tfs.shape[0]):
-        tfs[i]["norm"] = 1.0 / (1 + np.exp(- (tfs[i]["length"] - np.min(tfs["length"])) / (np.max(tfs["length"]) - np.min(tfs["length"]))))
+        tfs[i]["norm"] = 1.0 / (1 + np.exp(- 6 * (tfs[i]["length"] - np.min(tfs["length"])) / (np.max(tfs["length"]) - np.min(tfs["length"]))))
     
     np.save(os.path.join(storage_path, "tfs.npy"), tfs)
 
@@ -64,7 +64,7 @@ def tfidf_creation(text_data, idfs, storage_path):
     np.save(os.path.join(storage_path, "tf_idfs.npy"), tf_idfs)
     return tf_idfs
 
-def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, storage_path):
+def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, storage_path, bug_storage_path):
     
     tf_idfs = np.load(os.path.join(storage_path, "tf_idfs.npy"))
     if len(deleted_files) + len(added_files) + len(modified_files) == 0:
@@ -82,16 +82,21 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
         update_val = math.log(len(text_data)) - math.log(original_num)
         idfs["idf"] += update_val
 
-    count = np.zeros(dfs.size, dtype=[("term", "a30"), ("count", "f4")])
-    count["term"] = dfs["term"]
-    count["count"] = np.sum(tfs["tf"], 0)
-    
+    count = np.zeros(dfs.size)
+    temp_count = np.zeros(tfs.size)
+    temp_count = tfs["tf"]
+    temp_count[temp_count>0] = 1
+    count = np.sum(temp_count, 0)
+
     # for deleted files, delete the corresponding row in the tf array and change df
-    for code_file in deleted_files:   
-        tfs = np.delete(tfs, np.where(tfs["id"] == code_file.encode())[0][0], 0)
-        tf_idfs = np.delete(tf_idfs, np.where(tf_idfs["id"] == code_file.encode())[0][0], 0)
-    count["count"] = count["count"] - np.sum(tfs["tf"], 0)
-    dfs["df"] = dfs["df"] - count["count"]
+    for code_file in deleted_files:
+        if not np.where(tfs["id"] == code_file.encode())[0].size == 0:
+            tfs = np.delete(tfs, np.where(tfs["id"] == code_file.encode())[0][0], 0)
+            tf_idfs = np.delete(tf_idfs, np.where(tf_idfs["id"] == code_file.encode())[0][0], 0)
+    temp_count = tfs["tf"]
+    temp_count[temp_count>0] = 1
+    count = count - np.sum(temp_count, 0)
+    dfs["df"] = dfs["df"] - count
     
     # for modified files, update tf value, df value, and add terms
     for code_file in modified_files:
@@ -99,7 +104,7 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
         for i in range(tfs.shape[0]):
             if tfs[i]["id"][0] == code_file.encode():
                 tfs[i]["length"] = len(text_data[code_file]["content"])
-                tfs[i]["norm"] = 1.0 / (1 + np.exp(- (tfs[i]["length"] - min_length) / (max_length - min_length)))
+                tfs[i]["norm"] = 1.0 / (1 + np.exp(- 6 *(tfs[i]["length"] - min_length) / (max_length - min_length)))
                 
                 # store new tf value
                 tf_temp = np.zeros(dfs.size, dtype=[("term", "a30"), ("tf", "f4")])
@@ -153,7 +158,7 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
         if not tfs["term"].size == 0:
             temp["term"] = tfs["term"][0]
         temp["length"] = len(text_data[code_file]["content"])
-        temp["norm"] = 1.0 / (1 + np.exp(- (temp["length"] - min_length) / (max_length - min_length)))
+        temp["norm"] = 1.0 / (1 + np.exp(- 6 *(temp["length"] - min_length) / (max_length - min_length)))
         tfs = np.concatenate((tfs, temp), 0)
 
         # add a new row to tfidf
@@ -179,7 +184,7 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
                 tfs = np.concatenate((tfs, temp), 1)
                 
                 # add new term to tf_idf array
-                temp = np.zeros([tf_idf.shape[0], 1], dtype=[("id", "a250"),("term", "a30"), ("tf_idf", "f4"), ("norm", "f4")])
+                temp = np.zeros([tf_idfs.shape[0], 1], dtype=[("id", "a250"),("term", "a30"), ("tf_idf", "f4"), ("norm", "f4")])
                 temp["term"] = term.encode()
                 tf_idfs = np.concatenate((tf_idfs, temp), 1)
                 
@@ -202,8 +207,12 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
 
     # delete terms whose df==0
     tfs = np.delete(tfs, np.where(dfs["df"] == 0), 1)
-    dfs = np.delete(dfs, np.where(dfs["df"] == 0), 0)
     tf_idfs = np.delete(tf_idfs, np.where(dfs["df"] == 0), 1)
+    past_bugs_tfidf = np.load(os.path.join(bug_storage_path, "past_bugs_tfidf.npy"))
+    past_bugs_tfidf = np.delete(past_bugs_tfidf, np.where(dfs["df"] == 0), 1)
+    idfs = np.delete(idfs, np.where(dfs["df"] == 0), 0)
+    dfs = np.delete(dfs, np.where(dfs["df"] == 0), 0)
+    
 
     # make id and norm same in each row
     for i in range(tfs.shape[0]):
@@ -214,12 +223,13 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
 
     # if min or max length changes, update the norm value in whole array
     if not min_length == np.min(tfs["length"]) or not max_length == np.max(tfs["length"]):
-        tfs["norm"] = 1.0 / (1 + np.exp(- (tfs["length"] - np.min(tfs["length"])) / (np.max(tfs["length"]) - np.min(tfs["length"]))))
+        tfs["norm"] = 1.0 / (1 + np.exp(- 6 *(tfs["length"] - np.min(tfs["length"])) / (np.max(tfs["length"]) - np.min(tfs["length"]))))
         tf_idfs["norm"] = tfs["norm"]
 
     np.save(os.path.join(storage_path, "tfs.npy"), tfs)
     np.save(os.path.join(storage_path, "dfs.npy"), dfs)
     np.save(os.path.join(storage_path, "idfs.npy"), idfs)
     np.save(os.path.join(storage_path, "tf_idfs.npy"), tf_idfs)
+    np.save(os.path.join(bug_storage_path, "past_bugs_tfidf.npy"), past_bugs_tfidf)
 
     return tf_idfs
