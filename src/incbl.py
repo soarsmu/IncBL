@@ -40,23 +40,23 @@ class incbl():
 
         if not os.path.exists(os.path.join(self.code_storage_path, "idfs.npy")):
             start_time = time.time()
-            print("get the document-level features...")
-            idfs = get_docu_feature(code_data, self.code_storage_path)
+            print("get the document-level features for code files...")
+            idfs = get_docu_feature(code_data, self.code_storage_path, True)
             print("the time consuming is %f s" %(time.time() - start_time))
 
             start_time = time.time()
             print("get the term-level features...")
-            bug_vector = tfidf_creation(bug_data, idfs, self.bug_storage_path)
-            code_vector = tfidf_creation(code_data, idfs, self.code_storage_path)
+            bug_vector = tfidf_creation(bug_data, idfs, self.bug_storage_path, False)
+            code_vector = tfidf_creation(code_data, idfs, self.code_storage_path, True)
             print("the time consuming is %f s" %(time.time() - start_time))
         else:
             start_time = time.time()
             print("update tfidf model...")
-            code_vector = update_tfidf_feature(code_data, added_files, deleted_files, modified_files, self.code_storage_path, self.bug_storage_path)
+            code_vector = update_tfidf_feature(code_data, added_files, deleted_files, modified_files, self.code_storage_path)
             print("the time consuming is %f s" %(time.time() - start_time))
 
             idfs = np.load(os.path.join(self.code_storage_path, "idfs.npy"))
-            bug_vector = tfidf_creation(bug_data, idfs, self.bug_storage_path)
+            bug_vector = tfidf_creation(bug_data, idfs, self.bug_storage_path, False)
 
         start_time = time.time()
         print("compute similarities...")
@@ -66,5 +66,5 @@ class incbl():
         similarity = np.sort(similarity, order = "score")[:,:9]
         similarity["score"] = -similarity["score"]
         self.results = similarity
-        print(self.results)
+        # print(self.results)
         evaluation(self.results, bug_data)

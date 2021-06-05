@@ -4,7 +4,7 @@ import numpy as np
 import multiprocessing as mp
 from gensim.corpora import Dictionary
 
-def get_docu_feature(text_data, storage_path):
+def get_docu_feature(text_data, storage_path, is_save):
 
     text_content = []
     for content in text_data.values():
@@ -19,9 +19,10 @@ def get_docu_feature(text_data, storage_path):
     idfs = np.zeros(len(dct), dtype=[("term", "a30"), ("idf", "f4")])
     idfs["term"] = dfs["term"]
     idfs["idf"] = np.log(len(text_data)/(dfs["df"]+1.0))
-    
-    np.save(os.path.join(storage_path, "dfs.npy"), dfs)
-    np.save(os.path.join(storage_path, "idfs.npy"), idfs)
+
+    if is_save == True:
+        np.save(os.path.join(storage_path, "dfs.npy"), dfs)
+        np.save(os.path.join(storage_path, "idfs.npy"), idfs)
 
     return idfs
 
@@ -39,7 +40,7 @@ def get_term_feature(id_, cont, idfs):
     
     return tf
 
-def tfidf_creation(text_data, idfs, storage_path):
+def tfidf_creation(text_data, idfs, storage_path, is_save):
     
     tfs = []
 
@@ -52,18 +53,18 @@ def tfidf_creation(text_data, idfs, storage_path):
     tfs = np.array(tfs)
     min_length = np.mean(tfs["length"], 0)[0] - 3*np.std(tfs["length"], 0)[0]
     max_length = np.mean(tfs["length"], 0)[0] + 3*np.std(tfs["length"], 0)[0]
-    
     tfs["norm"] = 1.0 / (1 + np.exp(- 6 * (tfs["length"] - min_length) / (max_length - min_length)))
     
-    np.save(os.path.join(storage_path, "tfs.npy"), tfs)
-
     tf_idfs = np.zeros(tfs.shape, dtype=[("id", "a250"),("term", "a30"), ("tf_idf", "f4"), ("norm", "f4")])
-    
     tf_idfs["tf_idf"] = np.multiply(tfs["lv_tf"], idfs["idf"])
     tf_idfs["id"] = tfs["id"]
     tf_idfs["term"] = tfs["term"]
     tf_idfs["norm"] = tfs["norm"]
-    np.save(os.path.join(storage_path, "tf_idfs.npy"), tf_idfs)
+
+    if is_save == True:
+        np.save(os.path.join(storage_path, "tfs.npy"), tfs)
+        np.save(os.path.join(storage_path, "tf_idfs.npy"), tf_idfs)
+
     return tf_idfs
 
 def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, storage_path):
