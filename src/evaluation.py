@@ -30,7 +30,6 @@ def evaluation(results, bug_data, storage_path):
                 temp_1 = 0
             if not temp_2 == 0:
                 ap_value[bug_id] = map_tmp / len(file_paths)
-                map_value += map_tmp / len(file_paths)
     
     past_ap_value = {}
     if os.path.exists(os.path.join(storage_path, "evaluation.json")):
@@ -43,6 +42,6 @@ def evaluation(results, bug_data, storage_path):
     
     acc /= len(bug_data)
     map_value = sum(list(ap_value.values()))/count
-    # map_value /= count
+
     print("The accuracy @ top 10 is", acc)
     print("The MAP @ top 10 is", map_value)
