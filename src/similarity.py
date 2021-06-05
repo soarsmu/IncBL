@@ -21,7 +21,9 @@ def compute_similarity(bug_vector, code_vector, bug_data, past_bugs, storage_pat
 def update_bug_tfidf(past_bugs, bug_data, storage_path):
 
     if len(past_bugs) == 0:
-        new_bugs = list(bug_data.keys())
+        new_bugs = []
+        for bug_id in bug_data.keys():
+            new_bugs.append([bug_id])
         start_time = time.time()
         print("get the document-level features for bugs...")
         idfs = get_docu_feature(bug_data, storage_path, True)
@@ -43,18 +45,18 @@ def update_bug_tfidf(past_bugs, bug_data, storage_path):
         added_bugs = []
         modified_bugs = []
         for bug_id, bug_cont in bug_data.items():
-            bug_cont = bug_cont["content"]
             if not bug_id in past_bugs.keys():
                 added_bugs.append([bug_id])
             elif not bug_cont == past_bugs[bug_id]:
                 modified_bugs.append([bug_id])
-        past_bug_vectors = update_tfidf_feature(bug_data, added_bugs, [], modified_bugs, storage_path)
-        new_bugs = added_bugs + modified_bugs
-        
-        past_bugs = bug_data
+
+        past_bugs.update(bug_data)
         past_bugs = {k: v for k, v in sorted(past_bugs.items(), key = lambda date: date[1]["open_date"])}
         with open(os.path.join(storage_path, "bug_data.json"), "w") as f:
             json.dump(past_bugs, f)
+
+        past_bug_vectors = update_tfidf_feature(past_bugs, added_bugs, [], modified_bugs, storage_path)
+        new_bugs = added_bugs + modified_bugs
 
         return past_bug_vectors, past_bugs, new_bugs
 
@@ -62,9 +64,11 @@ def computing_bug_simi(tf_idfs, bug_vector, code_vector, past_bugs, new_bugs):
     
     count = 0
     bug_simi = 0
+    
     for bug_id, bug_cont in past_bugs.items():
         if code_vector["id"][0].decode() in bug_cont["fixed_files"] and bug_cont["open_date"]<=past_bugs[bug_vector["id"][0].decode()]["open_date"]:
-            if not tf_idfs[tf_idfs["id"]==bug_id.encode()].size == 0 and not (bug_vector["id"][0].decode() in new_bugs and bug_vector["id"][0].decode() == bug_id):
+            
+            if not tf_idfs[tf_idfs["id"]==bug_id.encode()].size == 0 and not ([bug_vector["id"][0].decode()] in new_bugs and bug_vector["id"][0].decode() == bug_id):
                 count += 1
                 bug_simi += np.sum(tf_idfs[tf_idfs["id"]==bug_vector["id"][0]]["tf_idf"] * tf_idfs[tf_idfs["id"]==bug_id.encode()]["tf_idf"])/(np.linalg.norm(tf_idfs[tf_idfs["id"]==bug_vector["id"][0]]["tf_idf"]) * np.linalg.norm(tf_idfs[tf_idfs["id"]==bug_id.encode()]["tf_idf"]))
     if not count == 0:

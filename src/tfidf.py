@@ -80,8 +80,8 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
     min_length = np.mean(tfs["length"], 0)[0] - 3*np.std(tfs["length"], 0)[0]
     max_length = np.mean(tfs["length"], 0)[0] + 3*np.std(tfs["length"], 0)[0]
     
-    original_num = len(text_data) + len(deleted_files) - len(added_files)
     if not len(deleted_files) - len(added_files) == 0:
+        original_num = len(text_data) + len(deleted_files) - len(added_files)
         update_val = math.log(len(text_data)) - math.log(original_num)
         idfs["idf"] += update_val
 
