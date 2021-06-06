@@ -22,6 +22,7 @@ def bug_reports_division(bug_reports_base, storage_path):
                 new_root =  ET.Element(all_root.tag, {"name": parent_dir.split("/")[-1].strip()})
                 bug_attrib = child.attrib
                 bug_attrib["id"] = str(i+1)
+                bug_attrib["opendate"] = str(parse(child.get("opendate"), ignoretz=True))
                 bug = ET.SubElement(new_root, "bug", bug_attrib)
                 title = ET.SubElement(bug, "title")
                 if child[0].text:
@@ -35,10 +36,10 @@ def bug_reports_division(bug_reports_base, storage_path):
                     files.text = file_path.text
                 new_tree = ET.ElementTree(new_root)
                 new_tree.write(os.path.join(os.path.join(storage_path, parent_dir.split("/")[-1].strip()), str(i+1)+".XML"), encoding="utf-8", xml_declaration=True)
-                id_time.append(str(i+1)+ "\t" +bug_attrib["opendate"])
+                id_time.append(str(i+1)+".XML"+ "\t" +bug_attrib["opendate"])
             with open(os.path.join(os.path.join(storage_path, parent_dir.split("/")[-1].strip()),"id_time.txt"), "w") as f:
                 for line in id_time:
-                    f.write(line+"\n")
+                    f.write(line+"\r\n")
 
 if __name__ == "__main__":
-    bug_reports_division("/home/jack/dataset/Bugzbook/Bugzbook", "/home/jack/dataset/Bugzbook/splited_Bugzbook")
+    bug_reports_division("/home/jack/dataset/Bugzbook/Bugzbook", "/home/jack/splited_Bugzbook")
