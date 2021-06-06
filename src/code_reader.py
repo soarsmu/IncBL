@@ -8,7 +8,7 @@ from src.text_processor import text_processor
 def mp_code_reader(code_base_path, file_type, storage_path):
 
     added_files, deleted_files, modified_files = filter_files(code_base_path, file_type, storage_path)
-
+    print(len(added_files + deleted_files))
     if os.path.exists(os.path.join(storage_path, "code_data.json")):
         with open(os.path.join(storage_path, "code_data.json"), "r") as f:
             code_data = json.load(f)
@@ -57,9 +57,9 @@ def filter_files(code_base_path, file_type, storage_path):
                     del code_data[file_path]
 
             for code_file in code_files:
-                if not code_file in code_data.keys():
+                if os.path.getsize(code_file) and not code_file in code_data.keys():
                     added_files.append([code_file, code_file.split(".")[-1].strip()])
-                else:
+                elif os.path.getsize(code_file):
                     code_cont = open(code_file)
                     md5_val = md5(code_cont.read().encode()).hexdigest()
                     code_cont.close()
