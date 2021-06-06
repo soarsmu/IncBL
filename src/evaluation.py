@@ -54,5 +54,5 @@ def evaluation(results, all_res, bug_data, storage_path):
         map_value = 0
         map_value_all = 0
 
-    print("The MAP @ top 10 is", map_value/count)
-    print("The MAP @ all results is", map_value_all/count)
+    print("The MAP @ top 10 is", map_value)
+    print("The MAP @ all results is", map_value_all)
