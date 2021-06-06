@@ -114,7 +114,7 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
                 tf_temp["term"] = dfs["term"]
 
                 for term in text_data[code_file]["content"]:
-                    if not tfs[i][dfs["term"]==term.encode()].size == 0:
+                    if dfs[dfs["term"]==term.encode()].size == 0:
                         # store tf value for old term
                         tf_temp["tf"][tf_temp["term"] == term.encode()] += 1
 
@@ -177,7 +177,7 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
         tf_temp["term"] = dfs["term"]
 
         for term in text_data[code_file]["content"]:
-            if not tfs[-1][dfs["term"]==term.encode()].size == 0:
+            if dfs[dfs["term"]==term.encode()].size == 0:
                 # store tf for old term in the new row
                 tf_temp["tf"][tf_temp["term"] == term.encode()] += 1
             else:
