@@ -31,7 +31,7 @@ def mp_code_reader(code_base_path, file_type, storage_path):
     
     with open(os.path.join(storage_path, "code_data.json"), "w") as f:
         json.dump(code_data, f)
-
+    
     return code_data, added_files, deleted_files, modified_files
 
 def filter_files(code_base_path, file_type, storage_path):
@@ -43,6 +43,7 @@ def filter_files(code_base_path, file_type, storage_path):
     
     dir_path = os.walk(code_base_path)
     for parent_dir, dir_name, file_names in dir_path:
+        # print(parent_dir, file_names)
         for file_name in file_names:
             if file_name.split(".")[-1].strip() in file_type:
                 code_files.append(os.path.join(parent_dir, file_name))
@@ -74,25 +75,20 @@ def filter_files(code_base_path, file_type, storage_path):
     else:
         for code_file in code_files:
             added_files.append([code_file, code_file.split(".")[-1].strip()])
-    
+
     return added_files, deleted_files, modified_files
 
 def added_files_reader(code_file, file_type):
     
     code_data = {}
-
     with open(code_file) as f:
         if os.path.getsize(code_file):
             code_cont = f.read()
             md5_val = md5(code_cont.encode()).hexdigest()
             code_data[code_file] = {"content": text_processor(code_parser(code_cont, file_type)), "md5": md5_val}
-            
     return code_data
 
 def modified_files_reader(code_file, file_type, original_data):
-    
-    code_data = {}
-
     with open(code_file) as f:
         if os.path.getsize(code_file):
             code_cont = f.read()
@@ -106,8 +102,7 @@ def code_parser(code_cont, file_type):
         file_type = "python"
     
     parser = Parser()
-    parser.set_language(Language('./lib/languages.so', file_type))
-
+    parser.set_language(Language('/home/jack/Blinpy-app/lib/languages.so', file_type))
     parsed_code = str.encode(code_cont)
     tree = parser.parse(parsed_code)
     code_lines = code_cont.split('\n')
