@@ -48,6 +48,8 @@ def evaluation(results, all_res, bug_data, storage_path):
         for ap in ap_value.values():
             map_value_all += ap["AP@all"]
             map_value += ap["AP@top10"]
+        map_value /= count
+        map_value_all/=count
     else:
         map_value = 0
         map_value_all = 0

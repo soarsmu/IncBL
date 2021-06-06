@@ -1,6 +1,5 @@
 import os
 import argparse
-import pymongo
 from src.incbl import incbl
 
 if __name__ == "__main__":
