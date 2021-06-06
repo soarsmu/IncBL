@@ -31,7 +31,7 @@ def evaluation(results, all_res, bug_data, storage_path):
                             if all_res[i][j]["file"] == file_path.encode():
                                 temp2 += 1
                                 all_ap_tmp += temp2/(j+1.0)
-            print(all_ap_tmp)
+            
             ap_value[bug_id]["AP@top10"] = ap_tmp / len(file_paths)
             ap_value[bug_id]["AP@all"] = all_ap_tmp / len(file_paths)
     
