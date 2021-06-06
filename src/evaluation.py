@@ -41,7 +41,9 @@ def evaluation(results, bug_data, storage_path):
         json.dump(past_ap_value, f)
     
     acc /= len(bug_data)
-    map_value = sum(list(ap_value.values()))/count
-
+    if not count ==0:
+        map_value = sum(list(ap_value.values()))/count
+    else:
+        map_value = 0
     print("The accuracy @ top 10 is", acc)
     print("The MAP @ top 10 is", map_value)
