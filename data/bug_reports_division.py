@@ -16,7 +16,7 @@ def bug_reports_division(bug_reports_base, storage_path):
                 root = tree.getroot()
                 for child in root:
                     all_root.append(child)
-    
+            id_time = []
             all_root[:] = sorted(all_root, key=lambda child: parse(child.get("opendate"), ignoretz=True).isoformat())
             for i, child in enumerate(all_root):
                 new_root =  ET.Element(all_root.tag, {"name": parent_dir.split("/")[-1].strip()})
@@ -35,6 +35,10 @@ def bug_reports_division(bug_reports_base, storage_path):
                     files.text = file_path.text
                 new_tree = ET.ElementTree(new_root)
                 new_tree.write(os.path.join(os.path.join(storage_path, parent_dir.split("/")[-1].strip()), str(i+1)+".XML"), encoding="utf-8", xml_declaration=True)
+                id_time.append(str(i+1)+ "\t" +bug_attrib["opendate"])
+            with open(os.path.join(os.path.join(storage_path, parent_dir.split("/")[-1].strip()),"id_time.txt"), "w") as f:
+                for line in id_time:
+                    f.write(line+"\n")
 
 if __name__ == "__main__":
     bug_reports_division("/home/jack/dataset/Bugzbook/Bugzbook", "/home/jack/dataset/Bugzbook/splited_Bugzbook")
