@@ -43,7 +43,6 @@ def filter_files(code_base_path, file_type, storage_path):
     
     dir_path = os.walk(code_base_path)
     for parent_dir, dir_name, file_names in dir_path:
-        # print(parent_dir, file_names)
         for file_name in file_names:
             if file_name.split(".")[-1].strip() in file_type:
                 code_files.append(os.path.join(parent_dir, file_name))
