@@ -5,7 +5,7 @@ import multiprocessing as mp
 from tree_sitter import Language, Parser
 from src.text_processor import text_processor
 
-def mp_code_reader(code_base_path, file_type, storage_path):
+def mp_code_reader(code_base_path, file_type, storage_path, incbl_root):
 
     added_files, deleted_files, modified_files = filter_files(code_base_path, file_type, storage_path)
     print(len(added_files + deleted_files))
@@ -18,14 +18,14 @@ def mp_code_reader(code_base_path, file_type, storage_path):
     if len(added_files):
         pool = mp.Pool(mp.cpu_count())
         for code_file in added_files:
-            pool.apply_async(added_files_reader, args=(code_file[0], code_file[1]), callback=code_data.update)
+            pool.apply_async(added_files_reader, args=(code_file[0], code_file[1], incbl_root), callback=code_data.update)
         pool.close()
         pool.join()
 
     if len(modified_files):
         pool = mp.Pool(mp.cpu_count())
         for code_file in modified_files:
-            pool.apply_async(modified_files_reader, args=(code_file[0], code_file[1], code_data), callback=code_data.update)
+            pool.apply_async(modified_files_reader, args=(code_file[0], code_file[1], incbl_root, code_data), callback=code_data.update)
         pool.close()
         pool.join()
     
@@ -77,31 +77,31 @@ def filter_files(code_base_path, file_type, storage_path):
 
     return added_files, deleted_files, modified_files
 
-def added_files_reader(code_file, file_type):
+def added_files_reader(code_file, file_type, incbl_root):
     
     code_data = {}
     with open(code_file) as f:
         if os.path.getsize(code_file):
             code_cont = f.read()
             md5_val = md5(code_cont.encode()).hexdigest()
-            code_data[code_file] = {"content": text_processor(code_parser(code_cont, file_type)), "md5": md5_val}
+            code_data[code_file] = {"content": text_processor(code_parser(code_cont, file_type, incbl_root)), "md5": md5_val}
     return code_data
 
-def modified_files_reader(code_file, file_type, original_data):
+def modified_files_reader(code_file, file_type, incbl_root, original_data):
     with open(code_file) as f:
         if os.path.getsize(code_file):
             code_cont = f.read()
-            code_data[code_file] = {"content": text_processor(code_parser(code_cont, file_type)), "md5": original_data[code_file]["md5"]}
+            code_data[code_file] = {"content": text_processor(code_parser(code_cont, file_type, incbl_root)), "md5": original_data[code_file]["md5"]}
     
     return code_data
 
-def code_parser(code_cont, file_type):
+def code_parser(code_cont, file_type, incbl_root):
 
     if file_type == "py":
         file_type = "python"
     
     parser = Parser()
-    parser.set_language(Language('/home/jack/Blinpy-app/lib/languages.so', file_type))
+    parser.set_language(Language(os.path.join(incbl_root, "lib/languages.so"), file_type))
     parsed_code = str.encode(code_cont)
     tree = parser.parse(parsed_code)
     code_lines = code_cont.split('\n')

@@ -11,7 +11,7 @@ from src.evaluation import evaluation
 
 class incbl():
 
-    def __init__(self, bug_report_path, code_base_path, file_type, storage_path):
+    def __init__(self, bug_report_path, code_base_path, file_type, storage_path, incbl_root):
         
         self.bug_report_path = bug_report_path
         self.code_base_path = code_base_path
@@ -23,6 +23,7 @@ class incbl():
         self.bug_storage_path = os.path.join(storage_path, "bugs/")
         if not os.path.exists(self.bug_storage_path):
             os.mkdir(os.path.join(storage_path, "bugs/"))
+        self.incbl_root = incbl_root
         self.results = {}
 
     def localization(self):
@@ -36,7 +37,7 @@ class incbl():
 
         start_time = time.time()
         print("read code files...")
-        code_data, added_files, deleted_files, modified_files = mp_code_reader(self.code_base_path, self.file_type, self.code_storage_path)
+        code_data, added_files, deleted_files, modified_files = mp_code_reader(self.code_base_path, self.file_type, self.code_storage_path, self.incbl_root)
         print("the time consuming is %f s" %(time.time() - start_time))
 
         if not os.path.exists(os.path.join(self.code_storage_path, "idfs.npy")):

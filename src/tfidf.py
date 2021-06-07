@@ -138,10 +138,10 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
                 
                 # update df, idf, tf        
                 for term in dfs["term"]:
-                    if (tf_temp["tf"][tf_temp["term"] == term] == 0) and not (tfs[i]["tf"][tf_temp["term"] == term] == 0):
+                    if (tf_temp[dfs["term"] == term]["tf"] == 0) and not (tfs[i][dfs["term"] == term]["tf"] == 0):
                         dfs[dfs["term"] == term] = np.asarray([(term, dfs[dfs["term"] == term]["df"] - 1.0)], dtype=[("term", "a30"), ("df", "f4")])
                         idfs["idf"][idfs["term"] == term] = np.log(len(text_data)/(dfs["df"][dfs["term"] == term]+1))
-                    elif not (tf_temp["tf"][tf_temp["term"] == term] == 0) and (tfs[i]["tf"][tf_temp["term"] == term] == 0):
+                    elif not (tf_temp[dfs["term"] == term]["tf"] == 0) and (tfs[i][dfs["term"] == term]["tf"] == 0):
                         dfs[dfs["term"] == term] = np.asarray([(term, dfs[dfs["term"] == term]["df"] + 1.0)], dtype=[("term", "a30"), ("df", "f4")])
                         idfs["idf"][idfs["term"] == term] = np.log(len(text_data)/(dfs["df"][dfs["term"] == term]+1))
                     tfs[i]["tf"][tf_temp["term"] == term] = tf_temp["tf"][tf_temp["term"] == term]
