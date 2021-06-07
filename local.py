@@ -17,7 +17,7 @@ if __name__ == "__main__":
     code_base_path = args.code_base_path
     file_type = args.file_type
     if args.storage_path == "":
-        storage_path = os.path.join(incbl_root, ".incbl-data" + code_base_path.split("/")[-1])
+        storage_path = os.path.join(incbl_root, ".incbl-data" + "/"+ code_base_path.split("/")[-1])
         if not os.path.exists(storage_path):
             os.makedirs(storage_path)
 
