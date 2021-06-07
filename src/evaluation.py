@@ -13,9 +13,19 @@ def evaluation(results, all_res, bug_data, storage_path):
         temp2 = 0
         ap_tmp = 0
         all_ap_tmp = 0
+        truth_num = 0
         file_paths = bug_cont["fixed_files"]
+
         if not len(file_paths) == 0:
+            for file_path in file_paths:
+                for i in range(all_res.shape[0]):
+                    if all_res[i]["bug"][0] == bug_id.encode():
+                        for j in range(all_res.shape[1]):
+                            if all_res[i][j]["file"] == file_path.encode():
+                                truth_num += 1
+        if truth_num > 0:
             count += 1
+        if not truth_num == 0:
             ap_value[bug_id] = {}
             for file_path in file_paths:
                 for i in range(results.shape[0]):
@@ -44,7 +54,7 @@ def evaluation(results, all_res, bug_data, storage_path):
     with open(os.path.join(storage_path, "evaluation.json"), "w") as f:
         json.dump(past_ap_value, f)
     
-    if not count ==0:
+    if not count == 0:
         for ap in ap_value.values():
             map_value_all += ap["AP@all"]
             map_value += ap["AP@top10"]
