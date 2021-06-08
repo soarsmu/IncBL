@@ -48,13 +48,16 @@ def mp_code_reader(code_base_path, file_type, storage_path, incbl_root):
     if len(added_files + modified_files):
         pool = mp.Pool(mp.cpu_count())
         for code_file in added_files + modified_files:
-            pool.apply_async(added_files_reader, args=(code_file[0], code_file[1], incbl_root, code_data)) #, callback=update_code_data
+            pool.apply_async(added_files_reader, args=(code_file[0], code_file[1], incbl_root)) #, callback=update_code_data
         pool.close()
         pool.join()
 
     while not q_to_store.empty():
         single_data = q_to_store.get()
-        file_name = list(single_data.keys())[0]
+        try:
+            file_name = list(single_data.keys())[0]
+        except:
+            continue
         code_data.update(single_data)
     print("Added finished")
 
@@ -115,19 +118,13 @@ def filter_files(code_base_path, file_type, storage_path):
 
     return added_files, deleted_files, modified_files
 
-def added_files_reader(code_file, file_type, incbl_root, original_data):
+def added_files_reader(code_file, file_type, incbl_root):
     code_data = {}
 
     with open(code_file) as f:
-
-
         if os.path.getsize(code_file):
             code_cont = f.read()
-            if not code_file in original_data.keys():
-                md5_val = md5(code_cont.encode()).hexdigest()
-            else:
-                md5_val = original_data[code_file]["md5"]
-
+            md5_val = md5(code_cont.encode()).hexdigest()
 
             cont = text_processor(code_parser(code_cont, file_type, incbl_root))
 
@@ -135,6 +132,7 @@ def added_files_reader(code_file, file_type, incbl_root, original_data):
 
 
     q_to_store.put(code_data)
+
     # return code_data
 
 def modified_files_reader(code_file, file_type, incbl_root, original_data):
