@@ -51,6 +51,17 @@ class incbl():
             bug_vector = tfidf_creation(bug_data, idfs, self.bug_storage_path, False)
             code_vector = tfidf_creation(code_data, idfs, self.code_storage_path, True)
             print("the time consuming is %f s" %(time.time() - start_time))
+        elif len(added_files + modified_files) > 20:
+            start_time = time.time()
+            print("get the document-level features for code files...")
+            idfs = get_docu_feature(code_data, self.code_storage_path, True)
+            print("the time consuming is %f s" %(time.time() - start_time))
+
+            start_time = time.time()
+            print("get the term-level features...")
+            bug_vector = tfidf_creation(bug_data, idfs, self.bug_storage_path, False)
+            code_vector = tfidf_creation(code_data, idfs, self.code_storage_path, True)
+            print("the time consuming is %f s" %(time.time() - start_time))
         else:
             start_time = time.time()
             print("update tfidf model...")
