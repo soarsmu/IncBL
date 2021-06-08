@@ -42,4 +42,4 @@ def bug_reports_division(bug_reports_base, storage_path):
                     f.write(line+"\r\n")
 
 if __name__ == "__main__":
-    bug_reports_division("/home/jack/dataset/Bugzbook/Bugzbook", "/home/jack/splited_Bugzbook")
+    bug_reports_division("/home/Blinpy-app/evaluation_results/Bugzbook_reports", "/home/Blinpy-app/evaluation_results/splitted_reports")

@@ -82,8 +82,9 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
     
     if not len(deleted_files) - len(added_files) == 0:
         original_num = len(text_data) + len(deleted_files) - len(added_files)
-        update_val = math.log(len(text_data)) - math.log(original_num)
-        idfs["idf"] += update_val
+        if not len(text_data)==0:
+            update_val = math.log(len(text_data)) - math.log(original_num)
+            idfs["idf"] += update_val
 
     count = np.zeros(dfs.size)
     temp_count = np.zeros(tfs.size)
@@ -161,7 +162,10 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
         temp["id"] = code_file.encode()
         if not tfs["term"].size == 0:
             temp["term"] = tfs["term"][0]
-        temp["length"] = len(text_data[code_file]["content"])
+        try: 
+            temp["length"] = len(text_data[code_file]["content"])
+        except:
+            continue
         temp["norm"] = 1.0 / (1 + np.exp(- 6 *(temp["length"] - min_length) / (max_length - min_length)))
         tfs = np.concatenate((tfs, temp), 0)
 
@@ -199,7 +203,7 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
                 tf_temp = np.concatenate((tf_temp, np.asarray([(term.encode(), 0)], dtype=[("term", "a30"), ("tf", "f4")])))
                 tf_temp["tf"][tf_temp["term"] == term.encode()] += 1
         
-        # update df, idf, tf        
+        # update df, idf, tf   
         for term in dfs["term"]:
             update_val = dfs[dfs["term"] == term]["df"] + 1
             dfs[dfs["term"] == term] = np.asarray([(term, update_val)], dtype=[("term", "a30"), ("df", "f4")])

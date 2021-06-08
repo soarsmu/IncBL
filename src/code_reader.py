@@ -5,29 +5,67 @@ import multiprocessing as mp
 from tree_sitter import Language, Parser
 from src.text_processor import text_processor
 
+
+
+from multiprocessing import Pool, Process, Queue, Manager
+import multiprocessing
+Manager
+
+manager = multiprocessing.Manager()
+
+q_to_store = manager.Queue()
+
 def mp_code_reader(code_base_path, file_type, storage_path, incbl_root):
 
+
+    # Language.build_library(
+    #     os.path.join(incbl_root, "lib/languages.so"),
+    #     [
+    #         '/home/tree-sitter-java',
+    #         '/home/tree-sitter-python'
+    #     ]
+    # )
+
     added_files, deleted_files, modified_files = filter_files(code_base_path, file_type, storage_path)
-    print(len(added_files + deleted_files))
     if os.path.exists(os.path.join(storage_path, "code_data.json")):
         with open(os.path.join(storage_path, "code_data.json"), "r") as f:
             code_data = json.load(f)
     else:
         code_data = {}
+    
+    def update_code_data(single_code_data):
+        print("hello")
+        # try:
+        #     file_id = list(single_code_data.keys())[0]
+        # except:
+        #     pass
+        # else:
+        #     code_data[file_id] = single_code_data[file_id]
 
-    if len(added_files):
+    def update_add_or_modified_files_by_name(file_name):
+        pass
+    print(len(added_files + modified_files))
+    if len(added_files + modified_files):
         pool = mp.Pool(mp.cpu_count())
-        for code_file in added_files:
-            pool.apply_async(added_files_reader, args=(code_file[0], code_file[1], incbl_root), callback=code_data.update)
+        for code_file in added_files + modified_files:
+            pool.apply_async(added_files_reader, args=(code_file[0], code_file[1], incbl_root, code_data)) #, callback=update_code_data
         pool.close()
         pool.join()
 
-    if len(modified_files):
-        pool = mp.Pool(mp.cpu_count())
-        for code_file in modified_files:
-            pool.apply_async(modified_files_reader, args=(code_file[0], code_file[1], incbl_root, code_data), callback=code_data.update)
-        pool.close()
-        pool.join()
+    while not q_to_store.empty():
+        single_data = q_to_store.get()
+        file_name = list(single_data.keys())[0]
+        code_data.update(single_data)
+    print("Added finished")
+
+    # if len(modified_files):
+    #     pool = mp.Pool(14)
+    #     for code_file in modified_files:
+    #         pool.apply_async(modified_files_reader, args=(code_file[0], code_file[1], incbl_root, code_data), callback=code_data.update)
+    #     pool.close()
+    #     pool.join()         
+
+    # print("Modified finished")
     
     with open(os.path.join(storage_path, "code_data.json"), "w") as f:
         json.dump(code_data, f)
@@ -77,17 +115,30 @@ def filter_files(code_base_path, file_type, storage_path):
 
     return added_files, deleted_files, modified_files
 
-def added_files_reader(code_file, file_type, incbl_root):
-    
+def added_files_reader(code_file, file_type, incbl_root, original_data):
     code_data = {}
+
     with open(code_file) as f:
+
+
         if os.path.getsize(code_file):
             code_cont = f.read()
-            md5_val = md5(code_cont.encode()).hexdigest()
-            code_data[code_file] = {"content": text_processor(code_parser(code_cont, file_type, incbl_root)), "md5": md5_val}
-    return code_data
+            if not code_file in original_data.keys():
+                md5_val = md5(code_cont.encode()).hexdigest()
+            else:
+                md5_val = original_data[code_file]["md5"]
+
+
+            cont = text_processor(code_parser(code_cont, file_type, incbl_root))
+
+            code_data[code_file] = {"content": cont, "md5": md5_val}
+
+
+    q_to_store.put(code_data)
+    # return code_data
 
 def modified_files_reader(code_file, file_type, incbl_root, original_data):
+    print("modified_file_reader")
     with open(code_file) as f:
         if os.path.getsize(code_file):
             code_cont = f.read()
@@ -97,8 +148,10 @@ def modified_files_reader(code_file, file_type, incbl_root, original_data):
 
 def code_parser(code_cont, file_type, incbl_root):
 
+
     if file_type == "py":
         file_type = "python"
+
     
     parser = Parser()
     parser.set_language(Language(os.path.join(incbl_root, "lib/languages.so"), file_type))
