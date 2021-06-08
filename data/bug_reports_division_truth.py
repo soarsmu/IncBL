@@ -18,6 +18,8 @@ def bug_reports_division(bug_reports_base, storage_path, file_type):
                     count = 1
                     if child[2].findall("file"):
                         for file_path in child[2].findall("file"):
+                            if not file_path.text:
+                                count = 0
                             if file_path.text and not file_path.text.split(".")[-1].strip() in file_type:
                                 count = 0
                     else: count = 0
@@ -49,4 +51,4 @@ def bug_reports_division(bug_reports_base, storage_path, file_type):
                     f.write(line+"\r\n")
 
 if __name__ == "__main__":
-    bug_reports_division("/home/jack/dataset/Bugzbook/Bugzbook", "/home/jack/bug_with_truth", ["java", "py", "c", "cpp"])
+    bug_reports_division("/home/jack/dataset/Bugzbook/Bugzbook", "/home/jack/bug_with_truth2", ["java", "py", "c", "cpp"])
