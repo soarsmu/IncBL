@@ -17,7 +17,7 @@ do
         ver=$(git rev-list --all -n 1 --before="$firstline|cut -d "L" -f 2")
         git reset --hard $ver
         bug=$(echo $firstline|cut -d "L" -f 1)
-        python "$incbl_root"/local.py"" "$incbl_root" "$bug_reports_path"/"$folder/$bug_pair/$bug"L"" "/home/jack/codebase/$folder"
+        python "$incbl_root"/local.py"" "$incbl_root" "$bug_reports_path"/"$folder/$bug_pair/$bug"L"" "$codebase_path"/"$folder"
         mkdir -p $results_path"/"$folder"/"$bug_pair
         cp -r $incbl_root"/.incbl-data/"$folder"/"* $results_path"/"$folder"/"$bug_pair
 
