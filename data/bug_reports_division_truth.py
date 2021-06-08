@@ -15,15 +15,12 @@ def bug_reports_division(bug_reports_base, storage_path, file_type):
                 tree = ET.parse(os.path.join(parent_dir, file_name))
                 root = tree.getroot()
                 for child in root:
-                    count = 1
+                    count = 0
                     if child[2].findall("file"):
                         for file_path in child[2].findall("file"):
-                            if not file_path.text:
-                                count = 0
-                            if file_path.text and not file_path.text.split(".")[-1].strip() in file_type:
-                                count = 0
-                    else: count = 0
-                    if count == 1:
+                            if file_path.text and file_path.text.split(".")[-1] in file_type:
+                                count += 1
+                    if count > 0 :
                         all_root.append(child)
             id_time = []
             all_root[:] = sorted(all_root, key=lambda child: parse(child.get("opendate"), ignoretz=True).isoformat())
@@ -41,8 +38,9 @@ def bug_reports_division(bug_reports_base, storage_path, file_type):
                     description.text = child[1].text
                 fixed_files = ET.SubElement(bug, "fixedfiles")
                 for file_path in child[2].findall("file"):
-                    files = ET.SubElement(fixed_files, "file")
-                    files.text = file_path.text
+                    if file_path.text.split(".")[-1] in file_type:
+                        files = ET.SubElement(fixed_files, "file")
+                        files.text = file_path.text
                 new_tree = ET.ElementTree(new_root)
                 new_tree.write(os.path.join(os.path.join(storage_path, parent_dir.split("/")[-1].strip()), str(i+1)+".XML"), encoding="utf-8", xml_declaration=True)
                 id_time.append(str(i+1)+".XML"+ "\t" +bug_attrib["opendate"])
@@ -51,4 +49,4 @@ def bug_reports_division(bug_reports_base, storage_path, file_type):
                     f.write(line+"\r\n")
 
 if __name__ == "__main__":
-    bug_reports_division("/home/jack/dataset/Bugzbook/Bugzbook", "/home/jack/bug_with_truth2", ["java", "py", "c", "cpp"])
+    bug_reports_division("/home/jack/dataset/Bugzbook/Bugzbook", "/home/jack/bug_with_truth3", ["java", "py", "c", "cpp"])
