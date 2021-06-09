@@ -222,9 +222,10 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
         
         # update df, idf, tf   
         for term in dfs["term"]:
-            update_val = dfs[dfs["term"] == term]["df"] + 1
-            dfs[dfs["term"] == term] = np.asarray([(term, update_val)], dtype=[("term", "a30"), ("df", "f4")])
-            idfs["idf"][idfs["term"] == term] = np.log(len(text_data)/(dfs["df"][dfs["term"] == term]+1))
+            if tf_temp[tf_temp["term"] == term]["tf"] > 0:
+                update_val = dfs[dfs["term"] == term]["df"] + 1
+                dfs[dfs["term"] == term] = np.asarray([(term, update_val)], dtype=[("term", "a30"), ("df", "f4")])
+                idfs["idf"][idfs["term"] == term] = np.log(len(text_data)/(dfs["df"][dfs["term"] == term]+1))
             tfs[-1]["tf"][tf_temp["term"] == term] = tf_temp["tf"][tf_temp["term"] == term]
 
         tfs[-1]["lv_tf"] = np.log(tfs[-1]["tf"]) + 1
