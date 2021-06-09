@@ -132,7 +132,7 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
                 tf_temp = np.zeros(dfs.size, dtype=[("term", "a30"), ("tf", "f4")])
                 tf_temp["term"] = dfs["term"]
                 for term in text_data[code_file]["content"]:
-                    if not dfs[dfs["term"]==term.encode()].size == 0:
+                    if not dfs[dfs["term"]==term.encode()].size == 0 or not tf_temp[tf_temp["term"]]:
                         # store tf value for old term
                         tf_temp["tf"][tf_temp["term"] == term.encode()] += 1
                     else:
@@ -221,7 +221,7 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
                 tf_temp["tf"][tf_temp["term"] == term.encode()] += 1
         
         # update df, idf, tf   
-        for term in dfs["term"]:
+        for term in tf_temp["term"]:
             update_val = dfs[dfs["term"] == term]["df"] + 1
             dfs[dfs["term"] == term] = np.asarray([(term, update_val)], dtype=[("term", "a30"), ("df", "f4")])
             idfs["idf"][idfs["term"] == term] = np.log(len(text_data)/(dfs["df"][dfs["term"] == term]+1))
