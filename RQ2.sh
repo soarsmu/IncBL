@@ -1,7 +1,9 @@
+
 bug_reports_path="/home/jack/clean_bugzbook/remove_truth"
 results_path="/home/jack/results"
 codebase_path="/home/jack/codebase"
 incbl_root="/home/jack/Blinpy-app"
+
 
 for folder in `ls $1`
 do {
