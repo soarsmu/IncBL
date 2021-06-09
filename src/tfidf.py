@@ -1,8 +1,11 @@
 import os
 import math
 import numpy as np
-import multiprocessing as mp
+from multiprocessing import Pool, Process, Queue, Manager
+import multiprocessing
 from gensim.corpora import Dictionary
+manager = multiprocessing.Manager()
+q_to_store = manager.Queue()
 
 def get_docu_feature(text_data, storage_path, is_save):
 
@@ -28,7 +31,7 @@ def get_docu_feature(text_data, storage_path, is_save):
 
 def get_term_feature(id_, cont, idfs):
     
-    tf = np.zeros(idfs.size, dtype=[("id", "a250"), ("term", "a30"), ("tf", "f4"), ("lv_tf", "f4"), ("length", "f4"), ("norm", "f4")])
+    tf = np.zeros([1, idfs.size], dtype=[("id", "a250"), ("term", "a30"), ("tf", "f4"), ("lv_tf", "f4"), ("length", "f4"), ("norm", "f4")])
     
     tf["id"] = id_
     tf["term"] = idfs["term"]
@@ -38,25 +41,39 @@ def get_term_feature(id_, cont, idfs):
     tf["lv_tf"] = np.log(tf["tf"]) + 1
     tf["lv_tf"][np.isinf(tf["lv_tf"])] = 0
     
-    return tf
+    q_to_store.put(tf)
+    #return tf
 
 def tfidf_creation(text_data, idfs, storage_path, is_save):
     
-    tfs = []
+    tfs = np.zeros([1, idfs.size], dtype=[("id", "a250"), ("term", "a30"), ("tf", "f4"), ("lv_tf", "f4"), ("length", "f4"), ("norm", "f4")])
 
-    pool = mp.Pool(mp.cpu_count())
+    # def update_tfs(tf):
+    #     nonlocal tfs
+    #     tfs = np.concatenate((tfs, tf), 0)
+
+    pool = multiprocessing.Pool(multiprocessing.cpu_count())
     for id_, cont in text_data.items():
-        pool.apply_async(get_term_feature, args=(id_, cont["content"], idfs), callback= tfs.append)
+        pool.apply_async(get_term_feature, args=(id_, cont["content"], idfs))# , callback= update_tfs)
     pool.close()
     pool.join()
 
-    tfs = np.array(tfs)
+    while not q_to_store.empty():
+        tf = q_to_store.get()
+        tfs = np.concatenate((tfs, tf), 0)
+        
+    print(tfs.shape)
+    tfs = np.delete(tfs, 0, 0)
+    print(tfs.shape)
     min_length = np.mean(tfs["length"], 0)[0] - 3*np.std(tfs["length"], 0)[0]
     max_length = np.mean(tfs["length"], 0)[0] + 3*np.std(tfs["length"], 0)[0]
     tfs["norm"] = 1.0 / (1 + np.exp(- 6 * (tfs["length"] - min_length) / (max_length - min_length)))
-    
+    print("b")
     tf_idfs = np.zeros(tfs.shape, dtype=[("id", "a250"),("term", "a30"), ("tf_idf", "f4"), ("norm", "f4")])
-    tf_idfs["tf_idf"] = np.multiply(tfs["lv_tf"], idfs["idf"])
+    for i in range(tf_idfs.shape[0]):
+        tf_idfs[i]["tf_idf"] = np.multiply(tfs[i]["lv_tf"], idfs["idf"])
+    # tf_idfs["tf_idf"] = np.multiply(tfs["lv_tf"], idfs["idf"])
+    print("c")
     tf_idfs["id"] = tfs["id"]
     tf_idfs["term"] = tfs["term"]
     tf_idfs["norm"] = tfs["norm"]
