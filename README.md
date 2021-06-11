@@ -1,42 +1,32 @@
-# IncBL
+[![Install App](https://img.shields.io/badge/GitHub%20App-Install-blueviolet?logo=github)](https://github.com/apps/incbl)
 
-**IncBL** is a tool for locate bugs based on bug reports.
+## What is IncBL?
 
-## TODOs:
+IncBL (**Inc**remental **B**ug **L**ocalization) is an efficient information retrieval-based bug localization tool that can store and update model incrementally to save running time. IncBL is implemented as an open-source GitHub app that can analyze the issues labelled as **bug** and comment with the suspicious code files to remind developers.
 
-- [x] Code file reader
-	- [x] Source Code reader
-	- [x] Code parser
-- [x] Bug reports reader
-- [x] Text processor
-	- [x] Tokenizer
-	- [x] Stummer and Stopwords removal
-- [x] TF computing
-	- [x] TF matrix creation
-	- [x] TF matrix update
-- [x] IDF computing
-	- [x] IDF matrix creation
-	- [x] IDF matrix update
-- [x] Similarity Computing
-	- [x] Bugs similarity
-	- [x] Code files and bugs similarity
-	- [x] Normalization
-- [x] Bug Localization
-    - [x] Ranking
-    - [x] Evaluation
-- [ ] GitHub Integration
-	- [ ] Clone and update repo
-	- [ ] Get and reply issues
-	- [ ] Reply PR comment
-  
-## Future Work
+## What are IncBL's features?
 
-1. 如果文件删除，或者重新命名，或者修改路径，则和bug report无法构建关系，如何处理，或者缓解这个问题。
-2. 是否意味着，需要存储更多的内容，是否可以进行增量存储；我们现在进行增量计算，只关心当前的矩阵，那么矩阵的历史是否需要保存。如果需要保存，肯定要进行增量存储。那么增量存储，用什么更合适？还是自己设计文件系统。
-3. Branch，每个branch是否都要进行计算
-4. bug report和code file之间的联系如何构建和维护。
-5. information retrival的截断问题.....
-6. 如何唯一标识一个文件。如果只是重命名，则MD5码。
-7. Nerual IR的incremental
+IncBL focuses on improving the efficiency by combining two main features:
 
+- IncBL refactors BugLocator with multiple-processing feature. It also utilizes bug history information and file length normalization to enhance accuracy, but can run 20 times faster than original BugLocator.
+- IncBL can store the Incremental update.
 
+IncBL can be installed as an GitHub app in any GitHub repository. IncBL can also be locally-deployed as a docker tool.
+
+A video demonstration of IncBL can found [here]().
+
+## Why we need IncBL?
+
+IncBL aims to help users provide better bug reports, increase the productivity of developers, and help researchers in their investigations.
+
+## How to use IncBL app?
+
+When use IncBL, all you need to do is adding IncBL to your GitHub repositories by following this [link](https://github.com/apps/incbl). Once installed, IncBL will analyze any incoming issue within your repositories and return the names of buggy files for **bug** issues.
+
+## How to customize and run IncBL locally?
+
+First, fork the repository and run：
+
+## Who develops IncBL?
+
+IncBL is developed by [Zhou YANG](https://yangzhou6666.github.io/), [Jieke SHI](http://jiekeshi.github.io/), [David LO](http://www.mysmu.edu/faculty/davidlo/) and [Shaowei WANG](https://sites.google.com/site/wswshaoweiwang) from the Singapore Management University and University of Manitoba.
