@@ -126,7 +126,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-
+.incbl_data
 .vscode
-data/codebase
+
 *.pem
+evaluation_results/*
+.incbl-data/*

@@ -13,4 +13,4 @@ pip install -U spacy
 
 pip install --upgrade gensim
 pip install tree_sitter
-pip install mysql-connector
+pip install python-dateutil

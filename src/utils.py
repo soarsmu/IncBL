@@ -1,11 +1,11 @@
-from src.incbl import incbl
-import mysql.connector
+import pymongo
 
-incbl_db = mysql.connector.connect(
-  host="localhost",
-  user="root",
-  passwd="123456"
-)
+client = pymongo.MongoClient("mongodb://localhost:27017/")
+incbl_db = client["incbl"]
+db = incbl_db["test4"]
+
+def table_connection():
+    pass
 
 def code_insert():
 
