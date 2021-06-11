@@ -100,7 +100,7 @@ async def main():
                                         similarity = compute_similarity(bug_vector, code_vector, bug_data, {}, "./in/bug")
                                         
                                         similarity["score"] = -similarity["score"]
-                                        results = np.sort(similarity, order = "score")[:,:9]
+                                        results = np.sort(similarity, order = "score")[:,:10]
                                         similarity = np.sort(similarity, order = "score")
                                         similarity["score"] = -similarity["score"]
                                         b = []
@@ -109,7 +109,7 @@ async def main():
                                                 b.append('/'.join(results[i][j]["file"].decode().split("/")[3:]))
                                         comment = ""
                                         for i, j in enumerate(b):
-                                            comment+="📑"+ str(i+1)+ ": " + "<b>"+j+"</b>"+"\n"
+                                            comment+="📑"+str(i)+":<b>"+j+"</b>"+"\n"
                                         a = await gh_app.post(
                                             "/repos/"+repo["full_name"]+"/issues/"+str(issue["number"])+"/comments",
                                             data={
