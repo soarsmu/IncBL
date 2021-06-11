@@ -4,43 +4,34 @@
 
 IncBL (**Inc**remental **B**ug **L**ocalization) is an efficient information retrieval-based bug localization tool for evolving software repositories. It can store and update model parameters incrementally to save running time without sacrificing accuracy. IncBL is implemented as an open-source GitHub app that can analyze the issues labelled as **bug** and comment with the suspicious code files to remind developers.
 
-## What are IncBL's features?
+## How to use IncBL app?
 
-IncBL focuses on improving the efficiency by combining two main features:
-
-- IncBL refactors BugLocator with multiple-processing feature. It also utilizes bug history information and file length normalization to enhance accuracy, but can run 20 times faster than original BugLocator.
-- IncBL can store the Incremental update.
-
-IncBL can be installed as an GitHub app in any GitHub repository, and can also be deployed and run in local servers.
+When using IncBL, all you need to do is adding IncBL to your GitHub repositories by following this [link](https://github.com/apps/incbl). Once IncBL being installed, it will automatically analyze the codebases and past bug reports. Each time when a new issue tagged with **bug** is raised, IncBL updates models incrementally and locates relevant buggy files for this report. After files are retrieved, IncBL posts the top 10 most relevant files in the issue so developers can get notified.
 
 A video demonstration of IncBL can found [here]().
 
-## How to use IncBL app?
-
-When use IncBL, all you need to do is adding IncBL to your GitHub repositories by following this [link](https://github.com/apps/incbl). One IncBL being installed, it will automatically analyze the codebases and past bug reports. Each time when a new issue tagged with **bug** is raised, IncBL updates models incrementally and locates relevant buggy files for this report. After files are retrieved, IncBL posts the top 10 most relevant files in the issue so developers can get notified.
-
 ## How to customize and run IncBL locally?
 
-First, fork this repository and run `bash env_config.sh` to create a virtual environment and install necessary dependencies.
-
-python main.py -h to find the usage instructions.
+First, fork this repository and run `bash env_config.sh` to create a virtual environment and install necessary dependencies. Then, run `python local.py -h` to find the usage instructions.
 
 There are three positional arguments:
 
-bug_report_directory: Bug report directory
-codebase: Codebase directory
-store: Path to store results
-There is one optional argument you may care about when localizing bugs in multi-language project:
+- `incbl_root`: IncBL's root directory
+- `bug_report_directory`: Bug report directory
+- `code_base_path`: Codebase directory
 
--ft FILE_TYPE_LIST [FILE_TYPE_LIST ...]
-There are the suffixes of files to be processed, in other words, they represents the programming languages. You can specify like -ft java py xml.
+There is two optional argument you may care about when localizing bugs in multi-language project:
 
-One usage example is: python main.py ./data/wicket.XML /media/zyang/dataset/wicket/ ./tmp -ft java xml It means that:
+`-ft [file_type_list]`
+The list is to clarify the suffixes of files to be processed, in other words, they represents the programming languages. You can specify like `-ft ["java", "py"]`.
+`-sp storage_path`
+This is for storage of incremental data.
 
-bug report is ./data/wicket.XML
-codebase is /media/zyang/dataset/wicket/
-I want to store the results in ./tmp
-I want to localize bug in java and xml files.
+One usage example is: `python local.py ./IncBL ./data/example.XML /dataset/example -ft ["java", "py"] -sp ./data` It means that:
+
+The bug report is `./data/example.XML`
+The codebase is `/dataset/example`
+IncBL will localize bug in `java` and `python` files, and save incremental data in `./data` folder.
 
 The localizing results and the Mean Average Presion (if ground truths exist) will be returned at the terminal.
 
