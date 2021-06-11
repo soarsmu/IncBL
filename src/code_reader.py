@@ -44,7 +44,7 @@ def mp_code_reader(code_base_path, file_type, storage_path, incbl_root):
 
     def update_add_or_modified_files_by_name(file_name):
         pass
-    print(len(added_files + modified_files))
+    # print(len(added_files + modified_files))
     if len(added_files + modified_files):
         pool = mp.Pool(mp.cpu_count())
         for code_file in added_files + modified_files:

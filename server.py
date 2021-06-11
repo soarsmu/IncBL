@@ -83,6 +83,8 @@ async def main():
                 "https://api.github.com/users/"+installation['account']['login']+"/repos",
                 accept="application/vnd.github.machine-man-preview+json",
                 ):  
+                    # if repo["full_name"] == "yangzhou6666/IncBL-demo":
+                        # print(repo)
                     if not repo["has_issues"] == False:
                         issues = await gh_app.getitem(
                             "/repos/"+repo["full_name"]+"/issues",
@@ -106,10 +108,10 @@ async def main():
                                         b = []
                                         for i in range(results.shape[0]):
                                             for j in range(results[i].shape[0]):
-                                                b.append('/'.join(results[i][j]["file"].decode().split("/")[3:]))
+                                                b.append("IncBL-demo/"+'/'.join(results[i][j]["file"].decode().split("/")[4:]))
                                         comment = ""
                                         for i, j in enumerate(b):
-                                            comment+="📑"+str(i+1)+":<b>"+j+"</b>"+"\n"
+                                            comment+="📑"+str(i+1)+": <b>"+j+"</b>"+"\n"
                                         a = await gh_app.post(
                                             "/repos/"+repo["full_name"]+"/issues/"+str(issue["number"])+"/comments",
                                             data={
@@ -117,26 +119,26 @@ async def main():
                                             },
                                         )
 asyncio.run(main())
-# import asyncio
-# import os
-# import time
+# # import asyncio
+# # import os
+# # import time
 
-# import aiohttp
-# import jwt
-# from gidgethub.aiohttp import GitHubAPI
+# # import aiohttp
+# # import jwt
+# # from gidgethub.aiohttp import GitHubAPI
 
 
-# def get_jwt(app_id):
+# # def get_jwt(app_id):
 
-#     path_to_private_key = PEM_FILE_PATH
-#     pem_file = open(path_to_private_key, "rt").read()
+# #     path_to_private_key = PEM_FILE_PATH
+# #     pem_file = open(path_to_private_key, "rt").read()
 
-#     payload = {
-#         "iat": int(time.time()),
-#         "exp": int(time.time()) + (10 * 60),
-#         "iss": app_id,
-#     }
-#     encoded = jwt.encode(payload, pem_file, algorithm="RS256")
+# #     payload = {
+# #         "iat": int(time.time()),
+# #         "exp": int(time.time()) + (10 * 60),
+# #         "iss": app_id,
+# #     }
+# #     encoded = jwt.encode(payload, pem_file, algorithm="RS256")
 
 #     return encoded
 
