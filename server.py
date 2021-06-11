@@ -109,7 +109,7 @@ async def main():
                                                 b.append('/'.join(results[i][j]["file"].decode().split("/")[3:]))
                                         comment = ""
                                         for i, j in enumerate(b):
-                                            comment+="📑"+str(i)+":<b>"+j+"</b>"+"\n"
+                                            comment+="📑"+str(i+1)+":<b>"+j+"</b>"+"\n"
                                         a = await gh_app.post(
                                             "/repos/"+repo["full_name"]+"/issues/"+str(issue["number"])+"/comments",
                                             data={
