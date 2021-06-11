@@ -21,7 +21,8 @@ if __name__ == "__main__":
         storage_path = os.path.join(incbl_root, ".incbl-data" + "/"+ code_base_path.split("/")[-1])
         if not os.path.exists(storage_path):
             os.makedirs(storage_path)
-
+    else:
+        storage_path = args.storage_path
     incbl = incbl(bug_report_path, code_base_path, file_type, storage_path, incbl_root)
     incbl.localization()
 
