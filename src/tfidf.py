@@ -62,18 +62,18 @@ def tfidf_creation(text_data, idfs, storage_path, is_save):
         tf = q_to_store.get()
         tfs = np.concatenate((tfs, tf), 0)
         
-    print(tfs.shape)
+    
     tfs = np.delete(tfs, 0, 0)
-    print(tfs.shape)
+
     min_length = np.mean(tfs["length"], 0)[0] - 3*np.std(tfs["length"], 0)[0]
     max_length = np.mean(tfs["length"], 0)[0] + 3*np.std(tfs["length"], 0)[0]
     tfs["norm"] = 1.0 / (1 + np.exp(- 6 * (tfs["length"] - min_length) / (max_length - min_length)))
-    print("b")
+
     tf_idfs = np.zeros(tfs.shape, dtype=[("id", "a250"),("term", "a30"), ("tf_idf", "f4"), ("norm", "f4")])
     for i in range(tf_idfs.shape[0]):
         tf_idfs[i]["tf_idf"] = np.multiply(tfs[i]["lv_tf"], idfs["idf"])
     # tf_idfs["tf_idf"] = np.multiply(tfs["lv_tf"], idfs["idf"])
-    print("c")
+
     tf_idfs["id"] = tfs["id"]
     tf_idfs["term"] = tfs["term"]
     tf_idfs["norm"] = tfs["norm"]

@@ -76,9 +76,11 @@ class incbl():
         similarity = compute_similarity(bug_vector, code_vector, bug_data, past_bugs, self.bug_storage_path)
         print("the time consuming is %f s" %(time.time() - start_time))
         similarity["score"] = -similarity["score"]
-        results = np.sort(similarity, order = "score")[:,:9]
+        results = np.sort(similarity, order = "score")[:,:10]
         similarity = np.sort(similarity, order = "score")
         similarity["score"] = -similarity["score"]
         self.results = results
-        # print(self.results)
-        evaluation(self.results, similarity, bug_data, self.storage_path)
+        for i in range(self.results.shape[0]):
+            for j in range(self.results.shape[1]):
+                print(j+1, ": ", self.results[i][j]["file"].decode())
+        # evaluation(self.results, similarity, bug_data, self.storage_path)
