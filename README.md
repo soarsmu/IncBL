@@ -14,24 +14,24 @@ A video demonstration of IncBL can found [here]().
 
 First, fork this repository and run `bash env_config.sh` to create a virtual environment and install necessary dependencies. Then, run `python local.py -h` to find the usage instructions.
 
-There are three positional arguments:
+There are three positional arguments in IncBL:
 
 - `incbl_root`: IncBL's root directory
 - `bug_report_directory`: Bug report directory
 - `code_base_path`: Codebase directory
 
-There is two optional argument you may care about when localizing bugs in multi-language project:
+There are two optional argument you may care about when localizing bugs in multi-language project:
 
 `-ft [file_type_list]`
-The list is to clarify the suffixes of files to be processed, in other words, they represents the programming languages. You can specify like `-ft ["java", "py"]`.
+The `file_type_list` is to clarify the suffixes of files to be processed, in other words, they represents the programming languages. You can specify like `-ft ["java", "py"]`.
 `-sp storage_path`
 This is for storage of incremental data.
 
 One usage example is: `python local.py ./IncBL ./data/example.XML /dataset/example -ft ["java", "py"] -sp ./data` It means that:
 
-The bug report is `./data/example.XML`
-The codebase is `/dataset/example`
-IncBL will localize bug in `java` and `python` files, and save incremental data in `./data` folder.
+- The bug report is `./data/example.XML`
+- The codebase is `/dataset/example`
+- IncBL will localize bug in `java` and `python` files, and save incremental data in `./data` folder.
 
 The localizing results and the Mean Average Presion (if ground truths exist) will be returned at the terminal.
 
