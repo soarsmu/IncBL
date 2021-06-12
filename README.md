@@ -8,7 +8,7 @@ IncBL (**Inc**remental **B**ug **L**ocalization) is an efficient information ret
 
 When using IncBL, all you need to do is installing IncBL to your GitHub repositories by following this [link](https://github.com/apps/incbl). Once IncBL being installed, it will automatically analyze the codebases and past bug reports. Each time when a new issue tagged with **bug** is raised, IncBL updates models incrementally and localizes relevant buggy files for this issue. After files are retrieved, IncBL posts the top 10 most relevant files in the issue so developers can get notified.
 
-A video demonstration of IncBL can found [here]().
+A video demonstration of IncBL can found [here](https://youtu.be/G4gMuvlJSb0).
 
 ## How to customize and run IncBL locally?
 
