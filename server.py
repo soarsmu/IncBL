@@ -83,8 +83,8 @@ async def main():
                 "https://api.github.com/users/"+installation['account']['login']+"/repos",
                 accept="application/vnd.github.machine-man-preview+json",
                 ):  
-                    # if repo["full_name"] == "yangzhou6666/IncBL-demo":
-                        # print(repo)
+                    if repo["full_name"] == "yangzhou6666/IncBL-demo":
+                        print(repo)
                     if not repo["has_issues"] == False:
                         issues = await gh_app.getitem(
                             "/repos/"+repo["full_name"]+"/issues",
