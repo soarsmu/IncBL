@@ -4,9 +4,6 @@ import numpy as np
 from multiprocessing import Pool, Process, Queue, Manager
 import multiprocessing
 from gensim.corpora import Dictionary
-import scipy.io
-from scipy.sparse import dok_matrix, save_npz
-
 manager = multiprocessing.Manager()
 q_to_store = manager.Queue()
 
@@ -19,11 +16,12 @@ def get_docu_feature(text_data, storage_path, is_save):
 
     dfs = np.zeros(len(dct), dtype=[("term", "a30"), ("df", "f4")])
     for i in range(len(dct)):
-        dfs[i] = (dct.__getitem__(i), dct.dfs[i]) 
-    
+        dfs[i]["term"] = dct.__getitem__(i)
+        dfs[i]["df"] = dct.dfs[i]
+        
     idfs = np.zeros(len(dct), dtype=[("term", "a30"), ("idf", "f4")])
-    for i in range(len(dct)):
-        idfs[i] = (dct.__getitem__(i), np.log(len(text_data)/(dfs[i]["df"]+1.0))) 
+    idfs["term"] = dfs["term"]
+    idfs["idf"] = np.log(len(text_data)/(dfs["df"]+1.0))
 
     if is_save == True:
         np.save(os.path.join(storage_path, "dfs.npy"), dfs)
@@ -31,100 +29,63 @@ def get_docu_feature(text_data, storage_path, is_save):
 
     return idfs
 
-# def get_docu_feature(text_data, storage_path, is_save):
-
-#     text_content = []
-#     for content in text_data.values():
-#         text_content.append(content["content"])
-#     dct = Dictionary(text_content)
-
-#     dfs = dok_matrix((1, len(dct)), dtype=[("term", "a30"), ("df", "f4")])
-#     for i in range(len(dct)):
-#         dfs[0, i] = (dct.__getitem__(i), dct.dfs[i])
+def get_term_feature(id_, cont, idfs):
     
-#     idfs = dok_matrix((1, len(dct)), dtype=[("term", "a30"), ("idf", "f4")])
-#     for i in range(len(dct)):
-#         idfs[0, i] = (dct.__getitem__(i), np.log(len(text_data)/(dfs[0, i]["df"]+1.0)))
-
-#     if is_save == True:
-#         np.save(os.path.join(storage_path, "dfs.npy"), dfs)
-#         scipy.io.savemat(os.path.join(storage_path, "idfs.mat"), idfs)
-#     print(dfs, idfs)
-#     return idfs
-
-# def get_term_feature(id_, cont, idfs):
-#     # 创建一个列矩阵用来存储ID？
-#     # 然后TF矩阵只有0或非0数字
-
-#     tf = dok_matrix((len(), idfs.size), dtype=[("id", "a250"), ("term", "a30"), ("tf", "f4"), ("lv_tf", "f4"), ("length", "f4"), ("norm", "f4")])
-#     for i in range(idfs.size):
-#         tf[0][i] = (id_, idfs[i]["term"], len(cont), )
-#     tf["id"] = id_
-#     tf["term"] = idfs["term"]
-#     tf["length"] = len(cont)
-#     for term in cont:
-#         tf["tf"][tf["term"] == term.encode()] += 1
-#     tf["lv_tf"] = np.log(tf["tf"]) + 1
-#     tf["lv_tf"][np.isinf(tf["lv_tf"])] = 0
-
-#     q_to_store.put(tf)
-
-# def tfidf_creation(text_data, idfs, storage_path, is_save):
-
-#     tfs = coo_matrix((1, idfs.size), dtype=[("id", "a250"), ("term", "a30"), ("tf", "f4"), ("lv_tf", "f4"), ("length", "f4"), ("norm", "f4")])
-
-#     pool = multiprocessing.Pool(multiprocessing.cpu_count())
-#     for id_, cont in text_data.items():
-#         pool.apply_async(get_term_feature, args=(id_, cont["content"], idfs))
-#     pool.close()
-#     pool.join()
-#     print(tfs)
-#     while not q_to_store.empty():
-#         tf = q_to_store.get()
-#         tfs = vstack([tfs, tf])
-
-    # tfs = np.delete(tfs, 0, 0)
-
-    # min_length = np.mean(tfs["length"], 0)[0] - 3*np.std(tfs["length"], 0)[0]
-    # max_length = np.mean(tfs["length"], 0)[0] + 3*np.std(tfs["length"], 0)[0]
-    # tfs["norm"] = 1.0 / (1 + np.exp(- 6 * (tfs["length"] - min_length) / (max_length - min_length)))
-
-    # tf_idfs = np.zeros(tfs.shape, dtype=[("id", "a250"),("term", "a30"), ("tf_idf", "f4"), ("norm", "f4")])
-    # for i in range(tf_idfs.shape[0]):
-    #     tf_idfs[i]["tf_idf"] = np.multiply(tfs[i]["lv_tf"], idfs["idf"])
-    # # tf_idfs["tf_idf"] = np.multiply(tfs["lv_tf"], idfs["idf"])
-
-    # tf_idfs["id"] = tfs["id"]
-    # tf_idfs["term"] = tfs["term"]
-    # tf_idfs["norm"] = tfs["norm"]
+    tf = np.zeros([1, idfs.size], dtype=[("id", "a250"), ("term", "a30"), ("tf", "f4"), ("lv_tf", "f4"), ("length", "f4"), ("norm", "f4")])
+    
+    tf["id"] = id_
+    tf["term"] = idfs["term"]
+    tf["length"] = len(cont)
+    for term in cont:
+        tf["tf"][tf["term"] == term.encode()] += 1
+    tf["lv_tf"] = np.log(tf["tf"]) + 1
+    tf["lv_tf"][np.isinf(tf["lv_tf"])] = 0
+    
+    q_to_store.put(tf)
+    #return tf
 
 def tfidf_creation(text_data, idfs, storage_path, is_save):
+    
+    tfs = np.zeros([1, idfs.size], dtype=[("id", "a250"), ("term", "a30"), ("tf", "f4"), ("lv_tf", "f4"), ("length", "f4"), ("norm", "f4")])
 
-    tfs = dok_matrix((len(text_data), idfs.size), dtype=[("tf", "f4"), ("lv_tf", "f4")])
-    for i, cont in enumerate(text_data.values()):
-        for term in cont["content"]:
-            print(idfs.tolist().index(term))
-            tfs[i, idfs["term"] == term.encode()]["tf"] += 1
-        # for j in range(idfs.size):
-        #     tfs[i, j] = (0, 0)
-    # pool = multiprocessing.Pool(multiprocessing.cpu_count())
-    # for id_, cont in text_data.items():
-    #     pool.apply_async(get_term_feature, args=(id_, cont["content"], idfs))
-    # pool.close()
-    # pool.join()
-    # print(tfs)
-    # while not q_to_store.empty():
-    #     tf = q_to_store.get()
-    #     tfs = vstack([tfs, tf])
+    # def update_tfs(tf):
+    #     nonlocal tfs
+    #     tfs = np.concatenate((tfs, tf), 0)
 
-    # if is_save == True:
-    #     save_npz(os.path.join(storage_path, "tfs.npz"), tfs)
-        # np.save(os.path.join(storage_path, "tf_idfs.npy"), tf_idfs)
-    print(tfs)
-    # return tf_idfs
+    pool = multiprocessing.Pool(multiprocessing.cpu_count())
+    for id_, cont in text_data.items():
+        pool.apply_async(get_term_feature, args=(id_, cont["content"], idfs))# , callback= update_tfs)
+    pool.close()
+    pool.join()
+
+    while not q_to_store.empty():
+        tf = q_to_store.get()
+        tfs = np.concatenate((tfs, tf), 0)
+        
+    
+    tfs = np.delete(tfs, 0, 0)
+
+    min_length = np.mean(tfs["length"], 0)[0] - 3*np.std(tfs["length"], 0)[0]
+    max_length = np.mean(tfs["length"], 0)[0] + 3*np.std(tfs["length"], 0)[0]
+    tfs["norm"] = 1.0 / (1 + np.exp(- 6 * (tfs["length"] - min_length) / (max_length - min_length)))
+
+    tf_idfs = np.zeros(tfs.shape, dtype=[("id", "a250"),("term", "a30"), ("tf_idf", "f4"), ("norm", "f4")])
+    for i in range(tf_idfs.shape[0]):
+        tf_idfs[i]["tf_idf"] = np.multiply(tfs[i]["lv_tf"], idfs["idf"])
+    # tf_idfs["tf_idf"] = np.multiply(tfs["lv_tf"], idfs["idf"])
+
+    tf_idfs["id"] = tfs["id"]
+    tf_idfs["term"] = tfs["term"]
+    tf_idfs["norm"] = tfs["norm"]
+
+    if is_save == True:
+        np.save(os.path.join(storage_path, "tfs.npy"), tfs)
+        np.save(os.path.join(storage_path, "tf_idfs.npy"), tf_idfs)
+
+    return tf_idfs
 
 def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, storage_path):
-
+    
     tf_idfs = np.load(os.path.join(storage_path, "tf_idfs.npy"))
     if len(deleted_files) + len(added_files) + len(modified_files) == 0:
         return tf_idfs
@@ -132,10 +93,10 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
     tfs = np.load(os.path.join(storage_path, "tfs.npy"))
     dfs = np.load(os.path.join(storage_path, "dfs.npy"))
     idfs = np.load(os.path.join(storage_path, "idfs.npy"))
-
+    
     min_length = np.mean(tfs["length"], 0)[0] - 3*np.std(tfs["length"], 0)[0]
     max_length = np.mean(tfs["length"], 0)[0] + 3*np.std(tfs["length"], 0)[0]
-
+    
     if not len(deleted_files) - len(added_files) == 0:
         original_num = len(text_data) + len(deleted_files) - len(added_files)
         if not len(text_data)==0:
@@ -157,7 +118,7 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
     temp_count[temp_count>0] = 1
     count = count - np.sum(temp_count, 0)
     dfs["df"] = dfs["df"] - count
-
+    
     # for modified files, update tf value, df value, and add terms
     for code_file in modified_files:
 
@@ -166,7 +127,7 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
             if tfs[i]["id"][0] == code_file.encode():
                 tfs[i]["length"] = len(text_data[code_file]["content"])
                 tfs[i]["norm"] = 1.0 / (1 + np.exp(- 6 *(tfs[i]["length"] - min_length) / (max_length - min_length)))
-            
+                
                 # store new tf value
                 tf_temp = np.zeros(dfs.size, dtype=[("term", "a30"), ("tf", "f4")])
                 tf_temp["term"] = dfs["term"]
@@ -179,16 +140,16 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
                         temp = np.zeros([tfs.shape[0], 1], dtype=[("id", "a250"), ("term", "a30"), ("tf", "f4"), ("lv_tf", "f4"), ("length", "f4"), ("norm", "f4")])
                         temp["term"] = term.encode()
                         tfs = np.concatenate((tfs, temp), 1)
-                    
+                        
                         # add new term to tf_idf array
                         temp = np.zeros([tf_idfs.shape[0], 1], dtype=[("id", "a250"),("term", "a30"), ("tf_idf", "f4"), ("norm", "f4")])
                         temp["term"] = term.encode()
                         tf_idfs = np.concatenate((tf_idfs, temp), 1)
-                    
+                        
                         # add new term to df, idf array
                         dfs = np.concatenate((dfs, np.asarray([(term.encode(), 0)], dtype=[("term", "a30"), ("df", "f4")])))
                         idfs = np.concatenate((idfs, np.asarray([(term.encode(), 0)], dtype=[("term", "a30"), ("idf", "f4")])))
-                    
+                        
                         tf_temp = np.concatenate((tf_temp, np.asarray([(term.encode(), 0)], dtype=[("term", "a30"), ("tf", "f4")])))
                         tf_temp["tf"][tf_temp["term"] == term.encode()] += 1
 
@@ -246,19 +207,19 @@ def update_tfidf_feature(text_data, added_files, deleted_files, modified_files, 
                 temp = np.zeros([tfs.shape[0], 1], dtype=[("id", "a250"), ("term", "a30"), ("tf", "f4"), ("lv_tf", "f4"), ("length", "f4"), ("norm", "f4")])
                 temp["term"] = term.encode()
                 tfs = np.concatenate((tfs, temp), 1)
-            
+                
                 # add new term to tf_idf array
                 temp = np.zeros([tf_idfs.shape[0], 1], dtype=[("id", "a250"),("term", "a30"), ("tf_idf", "f4"), ("norm", "f4")])
                 temp["term"] = term.encode()
                 tf_idfs = np.concatenate((tf_idfs, temp), 1)
-            
+                
                 # add new term to df, idf array
                 dfs = np.concatenate((dfs, np.asarray([(term.encode(), 0)], dtype=[("term", "a30"), ("df", "f4")])))
                 idfs = np.concatenate((idfs, np.asarray([(term.encode(), 0)], dtype=[("term", "a30"), ("idf", "f4")])))
-            
+                
                 tf_temp = np.concatenate((tf_temp, np.asarray([(term.encode(), 0)], dtype=[("term", "a30"), ("tf", "f4")])))
                 tf_temp["tf"][tf_temp["term"] == term.encode()] += 1
-    
+        
         # update df, idf, tf   
         for term in dfs["term"]:
             if tf_temp[tf_temp["term"] == term]["tf"] > 0:
