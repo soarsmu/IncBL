@@ -2,7 +2,7 @@
 
 ## What is IncBL?
 
-IncBL (**Inc**remental **B**ug **L**ocalization) is an efficient information retrieval-based bug localization tool for evolving software repositories. It can store and update model parameters incrementally to save running time without sacrificing accuracy. IncBL is implemented as an open-source GitHub app that can analyze the issues labelled as **bug** and comment with the suspicious code files to remind developers.
+[IncBL (**Inc**remental **B**ug **L**ocalization)](https://arxiv.org/abs/2106.07413) is an efficient information retrieval-based bug localization tool for evolving software repositories. It can store and update model parameters incrementally to save running time without sacrificing accuracy. IncBL is implemented as an open-source GitHub app that can analyze the issues labelled as **bug** and comment with the suspicious code files to remind developers.
 
 ## How to use IncBL app?
 
@@ -32,8 +32,35 @@ One usage example is: `python local.py ./IncBL ./data/example.XML /dataset/examp
 - The codebase is `/dataset/example`
 - IncBL will localize bug in `java` and `python` files, and save incremental data in `./data` folder.
 
-The localizing results and the Mean Average Presion (if ground truths exist) will be returned at the terminal.
+The localizing results and the Mean Average Precision (if ground truths exist) will be returned to the terminal.
+
+## Evaluation Results
+
+We evaluate IncBL on [Bugzbook](https://engineering.purdue.edu/RVL/Bugzbook/) dataset. On the Bugzbook dataset, IncBL can significantly reduce the running time for locating bugs in continuously evolving repositories by **77.79%** (i.e., **4.5 times faster**) on average compared with the original BugLocator. IncBL can also achieve a Mean Average Precision (MAP) of **0.331** – on average, the correct files appear in the **top 3 locations**. The dataset and detailed experimental results can be downloaded from this [link](https://smu-my.sharepoint.com/:f:/g/personal/jiekeshi_smu_edu_sg/EnjVSGkHWHJEkgNpEY570VcBagyJf2aBdGnU5yI4MyiqTw?e=BCpRO7). For the downloaded files:
+```
+IncBL_data
+    - datasets
+        - Bugzbook_reports ----------- The original full dataset from Bugzbook.
+        - cleaning_Bugzbook ---------- The clean dataset by removing non-code files in ground-truths.
+        - RQ1_dataset -----------------The sampled 381 reports considering a 95% confidence level and 5% interval to measure running time.
+    - results
+        - RQ1_results ------------------- Running time of IncBL and BugLocator on RQ1_dataset
+        - RQ2_results ------------------- Average Precision of IncBL on Bugzbook
+```
 
 ## Who develops IncBL?
 
 IncBL is developed by [Zhou YANG](https://yangzhou6666.github.io/), [Jieke SHI](http://jiekeshi.github.io/), [David LO](http://www.mysmu.edu/faculty/davidlo/) and [Shaowei WANG](https://sites.google.com/site/wswshaoweiwang) from the Singapore Management University and University of Manitoba.
+
+If you meet any problems when using the tool, please contact Jieke SHI by [jiekeshi@smu.edu.sg](mailto:jiekeshi@smu.edu.sg). Many thanks!
+
+```
+@misc{yang2021incbl,
+      title={IncBL: Incremental Bug Localization}, 
+      author={Zhou Yang and Jieke Shi and Shaowei Wang and David Lo},
+      year={2021},
+      eprint={2106.07413},
+      archivePrefix={arXiv},
+      primaryClass={cs.SE}
+}
+```
