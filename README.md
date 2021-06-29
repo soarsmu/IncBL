@@ -6,9 +6,9 @@
 
 ## How to use IncBL app?
 
-When using IncBL, all you need to do is installing IncBL to your GitHub repositories by following this [link](https://github.com/apps/incbl). Once IncBL being installed, it will automatically analyze the codebases and past bug reports. Each time when a new issue tagged with **bug** is raised, IncBL updates models incrementally and localizes relevant buggy files for this issue. After files are retrieved, IncBL posts the top 10 most relevant files in the issue so developers can get notified.
+When using IncBL, all you need to do is installing IncBL to your GitHub repositories by following this [link](https://github.com/apps/incbl). Once IncBL being installed, it will automatically analyze the codebases and past issues. Each time when a new issue tagged with **bug** is raised, IncBL updates models incrementally and localizes relevant buggy files for this issue. After files are retrieved, IncBL posts the top 10 most relevant files in the issue so developers can get notified.
 
-It should be noted that IncBL's running time depends on the size of projects. For small repos, IncBL can return results in **5-30 seconds**. But for lager code project it may need **several minutes**. Please be patient when waiting for the returned results.
+It should be noted that IncBL's running time depends on the size of projects. For small repos, IncBL can return results in **5-40 seconds**. But for lager code project it may need **several minutes**. Please be patient when waiting for the returned results.
 
 A video demonstration of IncBL can found [here](https://youtu.be/G4gMuvlJSb0).
 
