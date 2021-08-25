@@ -14,7 +14,11 @@ A video demonstration of IncBL can found [here](https://youtu.be/G4gMuvlJSb0).
 
 ## How to customize and run IncBL locally?
 
-First, fork this repository and run `bash env_config.sh` to create a virtual environment and install necessary dependencies. Then, run `python local.py -h` to find the usage instructions.
+First, fork this repository and run `bash env_config.sh` to create a virtual environment and install necessary dependencies. (I recommond to copy-paste commands in `env_config.sh` into your terminal and run them one-by-one.)
+
+
+
+Then, run `python local.py -h` to find the usage instructions.
 
 There are three positional arguments in IncBL:
 
@@ -49,6 +53,20 @@ IncBL_data
         - RQ1_results ------------------- Running time of IncBL and BugLocator on RQ1_dataset
         - RQ2_results ------------------- Average Precision of IncBL on Bugzbook
 ```
+
+## Dataset
+
+We use a recently proposed dataset, [Bugzboook](https://engineering.purdue.edu/RVL/Bugzbook/), for evaluate IncBL.
+
+You can download the bug reports in Bugzbook dataset from [link](https://engineering.purdue.edu/RVL/Bugzbook/Bugzbook.tar.gz).
+
+You can download the corresponding repositories. using the `clone.sh` scripts: 
+
+```
+bash clone.sh
+```
+
+
 
 ## Who develops IncBL?
 
