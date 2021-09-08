@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?><bugrepository name="ZXing">  
+		  <bug fixdate="Tue, 20 Jan 2009 18:25:55 +0000" id="364" opendate="2010-03-30 04:03:07">    
+			          
+				      <title>Crashes on Highscreen Zeus</title>      
+				      <description>1. When BarcodeScanner runs, it dead with NullPointerException 2. 3. V/CameraManager( 2138): Calculated framing rect: Rect(50, 0 - 350, 240) W/dalvikvm( 2138): threadid=17: thread exiting with uncaught exception (group=0x4001da28) E/AndroidRuntime( 2138): Uncaught handler: thread Thread-9 exiting due to uncaught exception E/AndroidRuntime( 2138): java.lang.IllegalArgumentException: Unsupported picture format: 0/null E/AndroidRuntime( 2138):</description>      
+			        
+			    <fixedFiles>      
+				      <file>android/src/com/google/zxing/client/android/HelpActivity.java</file>      
+			    </fixedFiles>    
+		  </bug>
+        </bugrepository>
