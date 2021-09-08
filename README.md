@@ -28,14 +28,14 @@ There are three positional arguments in IncBL:
 
 There are two optional argument you may care about when localizing bugs in multi-language project:
 
-- `-ft [file_type_list]` The `file_type_list` is to clarify the suffixes of files to be processed, in other words, they represents the programming languages. You can specify like `-ft ["java", "py"]`.
+- `-ft [file_type_list]` The `file_type_list` is to clarify the suffixes of files to be processed, in other words, they represents the programming languages. You can specify like `-ft java py`.
 
 - `-sp storage_path` This is for storage of incremental data.
 
-One usage example is: `python local.py ./IncBL ./data/example.XML /dataset/example -ft ["java", "py"] -sp ./data` It means that:
+One usage example is: `python local.py ../IncBL ./data/example.XML ../IncBL -ft java py -sp ./data` It means that:
 
 - The bug report is `./data/example.XML`
-- The codebase is `/dataset/example`
+- The codebase is `../IncBL`
 - IncBL will localize bug in `java` and `python` files, and save incremental data in `./data` folder.
 
 The localizing results and the Mean Average Precision (if ground truths exist) will be returned to the terminal.
