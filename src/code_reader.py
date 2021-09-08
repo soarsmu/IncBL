@@ -18,13 +18,6 @@ q_to_store = manager.Queue()
 def mp_code_reader(code_base_path, file_type, storage_path, incbl_root):
 
 
-    # Language.build_library(
-    #     os.path.join(incbl_root, "lib/languages.so"),
-    #     [
-    #         '/home/tree-sitter-java',
-    #         '/home/tree-sitter-python'
-    #     ]
-    # )
 
     added_files, deleted_files, modified_files = filter_files(code_base_path, file_type, storage_path)
     if os.path.exists(os.path.join(storage_path, "code_data.json")):
