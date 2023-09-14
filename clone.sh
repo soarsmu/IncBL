@@ -1,6 +1,6 @@
 pwd
 echo "Downloading codebase fo Bugzbook..."
-# git clone https://github.com/apache/ambari.git
+git clone https://github.com/apache/ambari.git
 git clone https://github.com/apache/bigtop.git
 git clone https://github.com/apache/camel.git
 git clone https://github.com/apache/cassandra.git
