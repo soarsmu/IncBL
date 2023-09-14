@@ -49,6 +49,7 @@ IncBL_data
         - RQ1_results ------------------- Running time of IncBL and BugLocator on RQ1_dataset
         - RQ2_results ------------------- Average Precision of IncBL on Bugzbook
 ```
+Note that the downloaded files may only contain bug reports but no code files. You can run `clone.sh` to download the corresponding repositories to get code files and run IncBL on them.
 
 ## Who develops IncBL?
 
